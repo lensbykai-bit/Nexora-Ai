@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 
+// APK build marker: Cortia-style Android package rebuild 2026-08-22.
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const NexoraDubAiApp());
