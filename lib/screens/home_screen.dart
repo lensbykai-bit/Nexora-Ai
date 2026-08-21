@@ -28,7 +28,9 @@ class _HomeScreenState extends State<HomeScreen> {
         allowedExtensions: ['mp4', 'mov', 'mkv', 'webm', 'mp3', 'wav', 'm4a', 'aac'],
       );
       if (!mounted || file == null) return;
-      final project = ProjectEntry(file.name, file.size);
+      final fileSize = await file.length();
+      if (!mounted) return;
+      final project = ProjectEntry(file.name, fileSize);
       setState(() => projects.insert(0, project));
       await Navigator.of(context).push(
         MaterialPageRoute(
