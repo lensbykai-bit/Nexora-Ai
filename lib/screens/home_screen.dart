@@ -23,12 +23,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> openNewProject({int initialStep = 0}) async {
     try {
-      final result = await FilePicker.pickFiles(
+      final file = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: ['mp4', 'mov', 'mkv', 'webm', 'mp3', 'wav', 'm4a', 'aac'],
       );
-      if (!mounted || result == null || result.files.isEmpty) return;
-      final file = result.files.first;
+      if (!mounted || file == null) return;
       final project = ProjectEntry(file.name, file.size);
       setState(() => projects.insert(0, project));
       await Navigator.of(context).push(
