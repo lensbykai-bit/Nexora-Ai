@@ -1,4 +1,10 @@
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.7-flash';
+const PRIMARY_MODEL = process.env.GEMINI_MODEL || 'gemini-3.7-flash';
+const GEMINI_MODELS = [...new Set([
+  PRIMARY_MODEL,
+  'gemini-3.6-flash',
+  'gemini-3.5-flash-lite',
+  'gemini-2.5-flash'
+])];
 const GATEWAY_MODEL = process.env.AI_GATEWAY_MODEL || 'google/gemini-3.5-flash-lite';
 
 export default async function handler(req, res) {
@@ -11,18 +17,17 @@ export default async function handler(req, res) {
 
   const prompt = buildPrompt({ brief, languagePair, videoType, tone, duration });
 
-  // 1) Use a direct Google Gemini key when one is explicitly configured.
   if (process.env.GEMINI_API_KEY) {
-    try {
-      const result = await generateWithGemini(prompt, process.env.GEMINI_API_KEY);
-      return res.status(200).json({ script: result, model: GEMINI_MODEL, provider: 'google-gemini' });
-    } catch (error) {
-      console.error('Direct Gemini failed, trying Vercel AI Gateway:', error);
+    for (const model of GEMINI_MODELS) {
+      try {
+        const result = await generateWithGemini(prompt, process.env.GEMINI_API_KEY, model);
+        return res.status(200).json({ script: result, model, provider: 'google-gemini' });
+      } catch (error) {
+        console.error(`Gemini model ${model} failed:`, error?.message || error);
+      }
     }
   }
 
-  // 2) On Vercel, use the deployment OIDC token automatically. This avoids
-  // requiring creators to paste an API key into the browser or repository.
   const gatewayToken = process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN;
   if (gatewayToken) {
     try {
@@ -33,7 +38,6 @@ export default async function handler(req, res) {
     }
   }
 
-  // 3) Keep the UI usable if no provider is available yet.
   return res.status(200).json({
     demo: true,
     provider: 'demo',
@@ -45,9 +49,12 @@ function buildPrompt({ brief, languagePair, videoType, tone, duration }) {
   return `You are the script engine inside Nexora AI, a short-video creator.\n\nCreate an ORIGINAL short-form narration using these settings:\n- Output/language instruction: ${languagePair || 'English'}\n- Video type: ${videoType || 'Short-form video'}\n- Tone: ${tone || 'Natural & engaging'}\n- Target duration: ${duration || 30} seconds\n- Source context / creator brief: ${brief}\n\nRequirements:\n1. Start with a strong, safe hook.\n2. Keep sentences natural and easy to speak aloud.\n3. Follow the requested language exactly.\n4. Organize as HOOK, MAIN, CTA.\n5. Make the wording original; do not copy a source video's transcript or captions.\n6. Do not include production notes unless essential.\n7. Output only the finished script.`;
 }
 
-async function generateWithGemini(prompt, apiKey) {
+async function generateWithGemini(prompt, apiKey, model) {
+  const generationConfig = { maxOutputTokens: 1600 };
+  if (!/^gemini-3\.(5|6)/.test(model)) generationConfig.temperature = 0.8;
+
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
     {
       method: 'POST',
       headers: {
@@ -56,14 +63,15 @@ async function generateWithGemini(prompt, apiKey) {
       },
       body: JSON.stringify({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.8, maxOutputTokens: 1600 }
+        generationConfig
       })
     }
   );
+
   const data = await response.json();
-  if (!response.ok) throw new Error(data?.error?.message || 'Gemini request failed.');
+  if (!response.ok) throw new Error(data?.error?.message || `Gemini ${model} request failed.`);
   const script = data?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('').trim();
-  if (!script) throw new Error('Gemini returned an empty script.');
+  if (!script) throw new Error(`Gemini ${model} returned an empty script.`);
   return script;
 }
 
@@ -77,7 +85,6 @@ async function generateWithGateway(prompt, token) {
     body: JSON.stringify({
       model: GATEWAY_MODEL,
       messages: [{ role: 'user', content: prompt }],
-      temperature: 0.8,
       max_tokens: 1600,
       stream: false
     })
