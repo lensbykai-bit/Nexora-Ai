@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Nexora Quick Creator — turn one idea into a complete short-form content pack." />
+  <title>Nexora Quick Creator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Khmer:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#090b0f;--panel:#12151b;--panel2:#171b22;--border:#252b35;--text:#f8fafc;--muted:#97a0b2;--mint:#58d6ad;--mint2:#39bb95;--violet:#7758ff;--warn:#f2c14e}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 10% 0%,rgba(88,214,173,.11),transparent 27%),radial-gradient(circle at 90% 12%,rgba(119,88,255,.12),transparent 24%),var(--bg);color:var(--text);font-family:Inter,'Noto Sans Khmer',sans-serif}button,input,textarea,select{font:inherit}.shell{width:min(1180px,calc(100% - 28px));margin:auto}.top{height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid rgba(255,255,255,.07)}.brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:900;font-size:21px}.logo{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--mint),var(--violet));color:#07110e;font-weight:900}.brand small{color:var(--mint);font-size:11px;letter-spacing:.14em}.nav{display:flex;align-items:center;gap:10px}.nav a{color:#ccd3df;text-decoration:none;padding:10px 14px;border:1px solid var(--border);border-radius:12px;background:#0f1217}.nav .pro{background:linear-gradient(135deg,var(--mint),var(--mint2));color:#06231a;border:0;font-weight:800}.hero{text-align:center;padding:58px 0 32px}.eyebrow{color:#8975ff;font-size:12px;font-weight:900;letter-spacing:.18em}.hero h1{font-size:clamp(2.3rem,6vw,4.5rem);line-height:1;margin:12px 0;letter-spacing:-.055em}.hero h1 span{background:linear-gradient(90deg,var(--mint),#7be8c6,#a68cff);-webkit-background-clip:text;background-clip:text;color:transparent}.hero p{color:var(--muted);max-width:720px;margin:0 auto;font-size:1.03rem;line-height:1.65}.workspace{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:22px;padding:22px 0 70px}.card{background:linear-gradient(180deg,rgba(20,23,30,.95),rgba(13,16,21,.96));border:1px solid var(--border);border-radius:22px;box-shadow:0 20px 60px rgba(0,0,0,.24)}.form-card{padding:22px;position:sticky;top:16px;height:max-content}.card-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px}.card-head h2{margin:0;font-size:1.35rem}.credit{font-size:12px;padding:8px 10px;border-radius:999px;border:1px solid #315b4d;background:#10251f;color:#82e5c5}.field{display:grid;gap:8px;margin-bottom:14px}.field label{font-size:12px;color:#cbd2de;font-weight:700}.field input,.field textarea,.field select{width:100%;border:1px solid var(--border);background:#0b0e12;color:#fff;border-radius:13px;padding:13px 14px;outline:0}.field textarea{resize:vertical;min-height:132px}.field input:focus,.field textarea:focus,.field select:focus{border-color:#4f9f84;box-shadow:0 0 0 3px rgba(88,214,173,.08)}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.gen{width:100%;min-height:54px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--mint),var(--mint2));color:#06251b;font-weight:900;cursor:pointer;margin-top:5px}.gen:disabled{opacity:.55;cursor:wait}.hint{color:#7d8799;font-size:12px;line-height:1.5;margin:11px 0 0}.results{padding:22px}.result-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.result-top h2{margin:0}.copy-all{border:1px solid var(--border);background:#10141a;color:#e8edf5;border-radius:11px;padding:9px 12px;cursor:pointer}.empty{min-height:520px;display:grid;place-items:center;text-align:center;color:var(--muted);border:1px dashed #2b313b;border-radius:16px}.empty span{display:block;font-size:42px;margin-bottom:10px}.out-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.out{background:#0d1015;border:1px solid var(--border);border-radius:15px;padding:15px;min-height:150px;position:relative}.out.script{grid-column:1/-1;min-height:230px}.out .label{font-size:11px;letter-spacing:.13em;color:#8975ff;font-weight:900;margin-bottom:9px}.out pre{white-space:pre-wrap;word-break:break-word;margin:0;color:#e7ebf2;font-family:inherit;font-size:14px;line-height:1.58;padding-right:38px}.copy{position:absolute;right:10px;top:10px;border:1px solid var(--border);background:#151a21;color:#dce2ec;border-radius:9px;padding:7px 9px;cursor:pointer}.model{margin-top:14px;color:#7f899b;font-size:12px}.model b{color:#8de2c7}.money{padding:0 0 80px}.money-card{padding:24px;display:grid;grid-template-columns:1.15fr repeat(3,1fr);gap:14px;align-items:stretch}.money-card h2{margin:0 0 8px;font-size:1.55rem}.money-card p{color:var(--muted);line-height:1.6;margin:0}.mini{border:1px solid var(--border);background:#0d1015;border-radius:15px;padding:16px}.mini strong{display:block;margin-bottom:7px}.mini span{font-size:12px;color:var(--muted);line-height:1.55}.status{min-height:20px;margin-top:10px;font-size:12px;color:#8bdcc2}.status.err{color:#ff9b9b}@media(max-width:900px){.workspace{grid-template-columns:1fr}.form-card{position:static}.money-card{grid-template-columns:1fr 1fr}.money-card>div:first-child{grid-column:1/-1}}@media(max-width:620px){.top{height:auto;padding:12px 0}.brand small{display:none}.nav a:first-child{display:none}.hero{padding-top:38px}.two,.out-grid,.money-card{grid-template-columns:1fr}.out.script,.money-card>div:first-child{grid-column:auto}.results,.form-card{padding:16px}}
+  </style>
+</head>
+<body>
+  <header class="shell top">
+    <a class="brand" href="index.html"><span class="logo">N</span><span>Nexora <small>AI</small></span></a>
+    <nav class="nav"><a href="studio.html#create">Full Studio</a><a class="pro" href="studio.html#subscription">Upgrade / Pricing</a></nav>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div class="eyebrow">NEXORA QUICK CREATOR</div>
+      <h1>One idea → <span>complete content pack</span></h1>
+      <p>Generate a title, hook, short-form script, caption, hashtags and thumbnail prompt in one click. Built to be faster and easier than a full video editor.</p>
+    </section>
+
+    <section class="workspace">
+      <div class="card form-card">
+        <div class="card-head"><h2>Create your pack</h2><span class="credit">⚡ 1 generation</span></div>
+        <div class="field"><label>Topic / idea</label><textarea id="idea" placeholder="Example: A beautiful 3-floor glass house in Minecraft, show the design and why it is useful..."></textarea></div>
+        <div class="field"><label>Optional reference link</label><input id="link" type="url" placeholder="TikTok / YouTube Shorts link (used only as context)"></div>
+        <div class="two">
+          <div class="field"><label>Language</label><select id="lang"><option value="French (FR)">FR — French</option><option value="English (EN)" selected>EN — English</option><option value="Spanish (ES)">ES — Spanish</option><option value="German (DE)">DE — German</option><option value="Russian (RU)">RU — Russian</option><option value="Khmer (KH)">KH — Khmer</option><option value="Chinese (CN)">CN — Chinese</option></select></div>
+          <div class="field"><label>Platform</label><select id="platform"><option>TikTok</option><option>YouTube Shorts</option><option>Instagram Reels</option><option>All short-form platforms</option></select></div>
+        </div>
+        <div class="two">
+          <div class="field"><label>Tone</label><select id="tone"><option>Natural & engaging</option><option>Energetic</option><option>Professional</option><option>Story-driven</option><option>Educational</option><option>Funny</option></select></div>
+          <div class="field"><label>Duration</label><select id="duration"><option value="15">15 seconds</option><option value="30" selected>30 seconds</option><option value="60">60 seconds</option></select></div>
+        </div>
+        <button class="gen" id="generate">✦ Generate Creator Pack</button>
+        <div class="status" id="status">Gemini is connected on the server. Your API key is never shown in the browser.</div>
+        <p class="hint">Use content you own or have permission to reuse. Nexora creates original wording rather than copying a source transcript.</p>
+      </div>
+
+      <div class="card results">
+        <div class="result-top"><h2>Your creator pack</h2><button class="copy-all" id="copyAll">Copy all</button></div>
+        <div id="empty" class="empty"><div><span>✦</span><strong>Your results will appear here</strong><p>One click creates everything you need to draft a short-form post.</p></div></div>
+        <div id="outputs" class="out-grid" hidden>
+          <article class="out"><div class="label">TITLE</div><button class="copy" data-copy="title">Copy</button><pre id="title"></pre></article>
+          <article class="out"><div class="label">HOOK</div><button class="copy" data-copy="hook">Copy</button><pre id="hook"></pre></article>
+          <article class="out script"><div class="label">SCRIPT</div><button class="copy" data-copy="script">Copy</button><pre id="script"></pre></article>
+          <article class="out"><div class="label">CAPTION</div><button class="copy" data-copy="caption">Copy</button><pre id="caption"></pre></article>
+          <article class="out"><div class="label">HASHTAGS</div><button class="copy" data-copy="hashtags">Copy</button><pre id="hashtags"></pre></article>
+          <article class="out script"><div class="label">THUMBNAIL PROMPT</div><button class="copy" data-copy="thumbnail">Copy</button><pre id="thumbnail"></pre></article>
+        </div>
+        <div class="model" id="model"></div>
+      </div>
+    </section>
+
+    <section class="money">
+      <div class="card money-card">
+        <div><h2>Designed to become a paid tool</h2><p>This version keeps the workflow cheap: one AI request produces six useful outputs. After authentication/payment is connected, it can be sold with credits or subscriptions without needing expensive video rendering for every user.</p></div>
+        <div class="mini"><strong>Free entry</strong><span>Give a small number of trial generations so new users can test the value quickly.</span></div>
+        <div class="mini"><strong>Pro upgrade</strong><span>Charge for more generations, saved history, brand presets and longer scripts.</span></div>
+        <div class="mini"><strong>Low server cost</strong><span>Text generation is much lighter than rendering full videos, which helps margins.</span></div>
+      </div>
+    </section>
+  </main>
+
+<script>
+const $=s=>document.querySelector(s);
+const fields=['title','hook','script','caption','hashtags','thumbnail'];
+const labels={TITLE:'title',HOOK:'hook',SCRIPT:'script',CAPTION:'caption',HASHTAGS:'hashtags',THUMBNAIL_PROMPT:'thumbnail'};
+function parsePack(text){const keys=Object.keys(labels);const out={};for(let i=0;i<keys.length;i++){const key=keys[i];const next=keys[i+1];const start=text.indexOf(key+':');if(start<0){out[labels[key]]='';continue}const from=start+key.length+1;const end=next?text.indexOf(next+':',from):-1;out[labels[key]]=text.slice(from,end>=0?end:text.length).trim()}return out}
+function setPack(pack){$('#empty').hidden=true;$('#outputs').hidden=false;fields.forEach(k=>$('#'+k).textContent=pack[k]||'—')}
+async function copyText(text,btn){if(!text)return;await navigator.clipboard.writeText(text);const old=btn?.textContent;if(btn){btn.textContent='Copied ✓';setTimeout(()=>btn.textContent=old,1100)}}
+$('.results').addEventListener('click',e=>{const b=e.target.closest('[data-copy]');if(b)copyText($('#'+b.dataset.copy).textContent,b)});
+$('#copyAll').onclick=()=>{const all=fields.map(k=>k.toUpperCase()+':\n'+$('#'+k).textContent).join('\n\n');copyText(all,$('#copyAll'))};
+$('#generate').onclick=async()=>{const idea=$('#idea').value.trim(),link=$('#link').value.trim();if(!idea&&!link){$('#status').textContent='Add a topic, idea, or reference link first.';$('#status').className='status err';return}const b=$('#generate');b.disabled=true;b.textContent='Generating…';$('#status').className='status';$('#status').textContent='Creating your pack with AI…';try{const brief=[idea,link?`Reference link: ${link}. Use it only as topic/context; do not copy its transcript.`:''].filter(Boolean).join('\n');const r=await fetch('/api/script',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'creator-pack',brief,languagePair:$('#lang').value,videoType:$('#platform').value,tone:$('#tone').value,duration:$('#duration').value})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Generation failed');const pack=parsePack(d.script||'');setPack(pack);$('#model').innerHTML=`Generated with <b>${d.provider||'AI'}</b>${d.model?' · '+d.model:''}`;$('#status').textContent=d.demo?'Demo output generated.':'Creator pack ready ✓';localStorage.setItem('nexoraQuickLast',JSON.stringify({pack,at:Date.now()}))}catch(err){$('#status').textContent=err.message||'Unable to generate right now.';$('#status').className='status err'}finally{b.disabled=false;b.textContent='✦ Generate Creator Pack'}};
+try{const saved=JSON.parse(localStorage.getItem('nexoraQuickLast')||'null');if(saved?.pack)setPack(saved.pack)}catch{}
+</script>
+</body>
+</html>
