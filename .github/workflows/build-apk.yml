@@ -1,4 +1,4 @@
-name: Build Nexora Dub.Ai APK
+name: Build Nexora Cortia APK
 
 on:
   workflow_dispatch:
@@ -55,10 +55,10 @@ jobs:
           cp pubspec.yaml .ci_flutter_app/pubspec.yaml
 
           if [ -f .ci_flutter_app/android/app/build.gradle.kts ]; then
-            sed -i 's/com\.nexora\.nexora_dub_ai/com.nexora.dubai/g' \
+            sed -i 's/com\.nexora\.nexora_dub_ai/com.nexora.cortiaapp/g' \
               .ci_flutter_app/android/app/build.gradle.kts
           elif [ -f .ci_flutter_app/android/app/build.gradle ]; then
-            sed -i 's/com\.nexora\.nexora_dub_ai/com.nexora.dubai/g' \
+            sed -i 's/com\.nexora\.nexora_dub_ai/com.nexora.cortiaapp/g' \
               .ci_flutter_app/android/app/build.gradle
           else
             echo "Android app Gradle file was not generated." >&2
@@ -66,12 +66,12 @@ jobs:
           fi
 
           manifest=.ci_flutter_app/android/app/src/main/AndroidManifest.xml
-          sed -i 's/android:label="nexora_dub_ai"/android:label="Nexora Dub.Ai"/' "$manifest"
+          sed -i 's/android:label="nexora_dub_ai"/android:label="Nexora Cortia"/' "$manifest"
 
           old=.ci_flutter_app/android/app/src/main/kotlin/com/nexora/nexora_dub_ai/MainActivity.kt
-          new=.ci_flutter_app/android/app/src/main/kotlin/com/nexora/dubai/MainActivity.kt
+          new=.ci_flutter_app/android/app/src/main/kotlin/com/nexora/cortiaapp/MainActivity.kt
           mkdir -p "$(dirname "$new")"
-          sed 's/package com.nexora.nexora_dub_ai/package com.nexora.dubai/' "$old" > "$new"
+          sed 's/package com.nexora.nexora_dub_ai/package com.nexora.cortiaapp/' "$old" > "$new"
           rm -rf .ci_flutter_app/android/app/src/main/kotlin/com/nexora/nexora_dub_ai
 
       - name: Get packages
@@ -91,13 +91,13 @@ jobs:
         run: |
           mkdir -p output
           cp .ci_flutter_app/build/app/outputs/flutter-apk/app-release.apk \
-            output/Nexora-DubAI-v1.0.0.apk
-          sha256sum output/Nexora-DubAI-v1.0.0.apk > output/SHA256.txt
+            output/Nexora-Cortia-v1.0.1.apk
+          sha256sum output/Nexora-Cortia-v1.0.1.apk > output/SHA256.txt
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Nexora-DubAI-Android
+          name: Nexora-Cortia-Android
           path: output/
           if-no-files-found: error
           retention-days: 30
