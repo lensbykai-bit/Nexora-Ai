@@ -1,0 +1,15 @@
+NEXORA DUB.AI — BUILD APK តាម GITHUB ACTIONS
+
+ខ្ញុំបានរៀបចំ GitHub Actions អោយ Build Android APK ស្វ័យប្រវត្តិ។
+
+វិធីទាញយក APK ពីទូរស័ព្ទ៖
+1. បើក GitHub repository: lensbykai-bit/Nexora-Ai
+2. ចូល tab Actions
+3. ជ្រើស Build Nexora Dub.Ai APK
+4. បើ build ជោគជ័យ (សញ្ញាបៃតង) ចុចចូល run នោះ
+5. នៅផ្នែក Artifacts ចុច Nexora-DubAI-Android
+6. Extract ZIP artifact
+7. ចុច Nexora-DubAI-v1.0.0.apk ដើម្បីដំឡើងលើ Android
+8. បើ Android រារាំង សូមអនុញ្ញាត Install unknown apps សម្រាប់ Browser/File Manager ដែលអ្នកកំពុងប្រើ
+
+ចំណាំ៖ Backend/API នៅទទេជាលំនាំដើម។ កុំដាក់ API key ឬ secret ក្នុង public source code។
