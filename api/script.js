@@ -1,4 +1,5 @@
-const MODEL = process.env.GEMINI_MODEL || 'gemini-3.7-flash';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.7-flash';
+const GATEWAY_MODEL = process.env.AI_GATEWAY_MODEL || 'google/gemini-3.5-flash-lite';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -8,47 +9,86 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'A video brief is required.' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    return res.status(200).json({
-      demo: true,
-      script: demoScript({ brief, languagePair, videoType, tone, duration })
-    });
-  }
+  const prompt = buildPrompt({ brief, languagePair, videoType, tone, duration });
 
-  const prompt = `You are the script engine inside Nexora Ai, a short-video creator.\n\nCreate a polished script using these settings:\n- Language flow: ${languagePair || 'English to Khmer'}\n- Video type: ${videoType || 'Short-form video'}\n- Tone: ${tone || 'Natural & engaging'}\n- Target duration: ${duration || 30} seconds\n- User brief: ${brief}\n\nRequirements:\n1. Start with a strong, safe hook.\n2. Keep sentences easy to speak aloud.\n3. Respect the requested language direction. If translating, preserve meaning naturally rather than word-for-word.\n4. Organize as HOOK, MAIN, CTA.\n5. Do not include production notes unless essential.\n6. Output only the finished script.`;
-
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(MODEL)}:generateContent`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-goog-api-key': apiKey
-        },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.8, maxOutputTokens: 1200 }
-        })
-      }
-    );
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error('Gemini API error:', data);
-      return res.status(502).json({ error: data?.error?.message || 'AI provider request failed.' });
+  // 1) Use a direct Google Gemini key when one is explicitly configured.
+  if (process.env.GEMINI_API_KEY) {
+    try {
+      const result = await generateWithGemini(prompt, process.env.GEMINI_API_KEY);
+      return res.status(200).json({ script: result, model: GEMINI_MODEL, provider: 'google-gemini' });
+    } catch (error) {
+      console.error('Direct Gemini failed, trying Vercel AI Gateway:', error);
     }
-
-    const script = data?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('').trim();
-    if (!script) return res.status(502).json({ error: 'AI returned an empty script.' });
-    return res.status(200).json({ script, model: MODEL });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Unable to generate script right now.' });
   }
+
+  // 2) On Vercel, use the deployment OIDC token automatically. This avoids
+  // requiring creators to paste an API key into the browser or repository.
+  const gatewayToken = process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN;
+  if (gatewayToken) {
+    try {
+      const result = await generateWithGateway(prompt, gatewayToken);
+      return res.status(200).json({ script: result, model: GATEWAY_MODEL, provider: 'vercel-ai-gateway' });
+    } catch (error) {
+      console.error('Vercel AI Gateway failed:', error);
+    }
+  }
+
+  // 3) Keep the UI usable if no provider is available yet.
+  return res.status(200).json({
+    demo: true,
+    provider: 'demo',
+    script: demoScript({ brief, languagePair, videoType, tone, duration })
+  });
+}
+
+function buildPrompt({ brief, languagePair, videoType, tone, duration }) {
+  return `You are the script engine inside Nexora AI, a short-video creator.\n\nCreate an ORIGINAL short-form narration using these settings:\n- Output/language instruction: ${languagePair || 'English'}\n- Video type: ${videoType || 'Short-form video'}\n- Tone: ${tone || 'Natural & engaging'}\n- Target duration: ${duration || 30} seconds\n- Source context / creator brief: ${brief}\n\nRequirements:\n1. Start with a strong, safe hook.\n2. Keep sentences natural and easy to speak aloud.\n3. Follow the requested language exactly.\n4. Organize as HOOK, MAIN, CTA.\n5. Make the wording original; do not copy a source video's transcript or captions.\n6. Do not include production notes unless essential.\n7. Output only the finished script.`;
+}
+
+async function generateWithGemini(prompt, apiKey) {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey
+      },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.8, maxOutputTokens: 1600 }
+      })
+    }
+  );
+  const data = await response.json();
+  if (!response.ok) throw new Error(data?.error?.message || 'Gemini request failed.');
+  const script = data?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('').trim();
+  if (!script) throw new Error('Gemini returned an empty script.');
+  return script;
+}
+
+async function generateWithGateway(prompt, token) {
+  const response = await fetch('https://ai-gateway.vercel.sh/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: GATEWAY_MODEL,
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.8,
+      max_tokens: 1600,
+      stream: false
+    })
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data?.error?.message || data?.message || 'AI Gateway request failed.');
+  const script = data?.choices?.[0]?.message?.content?.trim();
+  if (!script) throw new Error('AI Gateway returned an empty script.');
+  return script;
 }
 
 function demoScript({ brief, languagePair, videoType, tone, duration }) {
-  return `HOOK: Turn one idea into a short-video script in seconds.\n\nMAIN: ${brief}\n\nThis draft is prepared for a ${duration || 30}-second ${videoType || 'short-form'} video with a ${tone || 'natural'} tone. Language flow: ${languagePair || 'English to Khmer'}. Connect your Gemini API key to replace this demo with live AI generation.\n\nCTA: Create smarter. Create faster. Create with Nexora Ai.`;
+  return `HOOK: Turn this idea into an attention-grabbing opening.\n\nMAIN: ${brief}\n\nThis original draft is prepared for a ${duration || 30}-second ${videoType || 'short-form'} video with a ${tone || 'natural'} tone. Language instruction: ${languagePair || 'English'}.\n\nCTA: Create smarter. Create faster. Create with Nexora AI.`;
 }
