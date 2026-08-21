@@ -8,6 +8,12 @@ on:
       - "lib/**"
       - "pubspec.yaml"
       - ".github/workflows/build-apk.yml"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "lib/**"
+      - "pubspec.yaml"
+      - ".github/workflows/build-apk.yml"
 
 permissions:
   contents: read
@@ -44,11 +50,10 @@ jobs:
             --project-name nexora_dub_ai \
             .ci_flutter_app
 
-          rm -rf .ci_flutter_app/lib
+          rm -rf .ci_flutter_app/lib .ci_flutter_app/test
           cp -R lib .ci_flutter_app/lib
           cp pubspec.yaml .ci_flutter_app/pubspec.yaml
 
-          # Replace generated Android package with Nexora's independent package.
           if [ -f .ci_flutter_app/android/app/build.gradle.kts ]; then
             sed -i 's/com\.nexora\.nexora_dub_ai/com.nexora.dubai/g' \
               .ci_flutter_app/android/app/build.gradle.kts
