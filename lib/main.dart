@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 
-// APK build marker: Cortia-style Android package rebuild 2026-08-22 (sync trigger).
+// Install-safe Cortia-style Android package rebuild 2026-08-22.
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const NexoraDubAiApp());
@@ -15,7 +15,7 @@ class NexoraDubAiApp extends StatelessWidget {
     const seed = Color(0xFF7C4DFF);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Nexora Dub.Ai',
+      title: 'Nexora Cortia',
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
