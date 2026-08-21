@@ -1,0 +1,11 @@
+{
+  "name": "nexora-ai",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Nexora Ai — AI-assisted short-video creator workspace",
+  "scripts": {
+    "dev": "vercel dev",
+    "preview": "python -m http.server 8080"
+  }
+}
