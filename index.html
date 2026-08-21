@@ -3,215 +3,114 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Nexora Ai — AI short-video script and creator workspace." />
-  <title>Nexora Ai — AI Video Creator</title>
+  <meta name="description" content="Nexora AI — AI-assisted short-video creation studio." />
+  <title>Nexora AI — Create Short Videos Faster</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Khmer:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Khmer:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="landing.css" />
 </head>
-<body>
-  <div class="app-shell">
-    <aside class="sidebar">
-      <a class="brand" href="#" aria-label="Nexora Ai home">
-        <span class="brand-mark">N</span>
-        <span class="brand-copy"><strong>Nexora</strong><small>AI STUDIO</small></span>
-      </a>
+<body class="landing-page">
+  <div class="site-noise"></div>
+  <header class="landing-nav shell">
+    <a class="brand" href="index.html" aria-label="Nexora AI home">
+      <span class="brand-mark">N</span>
+      <span class="brand-copy"><strong>Nexora</strong><small>AI</small></span>
+    </a>
+    <nav class="landing-links" aria-label="Main navigation">
+      <a href="#workflow">How it works</a>
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+    </nav>
+    <div class="landing-actions">
+      <a class="text-btn" href="studio.html">Log in</a>
+      <a class="primary-btn compact" href="studio.html">Open Studio <span>→</span></a>
+    </div>
+  </header>
 
-      <nav class="nav-group" aria-label="Main navigation">
-        <button class="nav-item active" data-page="create"><span>✦</span> Create Video</button>
-        <button class="nav-item" data-page="projects"><span>▦</span> My Projects</button>
-        <button class="nav-item" data-page="templates"><span>◈</span> Templates <em>NEW</em></button>
-        <button class="nav-item" data-page="voices"><span>♫</span> AI Voices</button>
-      </nav>
-
-      <div class="sidebar-spacer"></div>
-      <div class="usage-card">
-        <div class="usage-top"><span>Monthly credits</span><strong>68%</strong></div>
-        <div class="usage-track"><i></i></div>
-        <small>680 / 1,000 credits used</small>
-        <button class="upgrade-btn">Upgrade plan</button>
-      </div>
-      <button class="nav-item"><span>?</span> Help & Guides</button>
-      <button class="nav-item"><span>⚙</span> Settings</button>
-      <div class="profile-chip">
-        <div class="avatar">N</div>
-        <div><strong>Nexora Creator</strong><small>Free workspace</small></div>
-        <span>⋯</span>
-      </div>
-    </aside>
-
-    <main class="workspace">
-      <header class="topbar">
-        <div>
-          <span class="eyebrow">NEXORA AI / CREATE</span>
-          <h1>Create a viral-ready video</h1>
+  <main>
+    <section class="hero shell">
+      <div class="hero-copy-block">
+        <div class="pill"><span>✦</span> AI short-video workspace</div>
+        <h1>Create better short videos <span>without the editing chaos.</span></h1>
+        <p>Bring your references, shape the script, choose voice, subtitles, music and hook, then prepare the project for rendering in one creator-first workspace.</p>
+        <div class="hero-actions">
+          <a class="primary-btn big" href="studio.html">Create a video <span>→</span></a>
+          <a class="secondary-btn big" href="#workflow">See how it works</a>
         </div>
-        <div class="top-actions">
-          <span class="status-dot">● API Ready</span>
-          <button class="ghost-btn" id="saveDraftBtn">Save draft</button>
-        </div>
-      </header>
-
-      <section class="stepper" aria-label="Creation steps">
-        <div class="step active"><span>1</span><div><strong>Import</strong><small>Add your source</small></div></div>
-        <i></i>
-        <div class="step"><span>2</span><div><strong>Script</strong><small>Generate with AI</small></div></div>
-        <i></i>
-        <div class="step"><span>3</span><div><strong>Voice</strong><small>Choose narrator</small></div></div>
-        <i></i>
-        <div class="step"><span>4</span><div><strong>Style</strong><small>Subtitle & music</small></div></div>
-        <i></i>
-        <div class="step"><span>5</span><div><strong>Export</strong><small>Render video</small></div></div>
-      </section>
-
-      <div class="content-grid">
-        <section class="creator-panel">
-          <div class="section-heading">
-            <div><span class="section-kicker">01 — SOURCE</span><h2>Start from a video</h2><p>Upload your clip or paste a TikTok / YouTube Shorts link.</p></div>
-            <span class="secure-badge">🔒 Private</span>
-          </div>
-
-          <div class="source-tabs" role="tablist">
-            <button class="source-tab active" data-source="upload">↑ Upload video</button>
-            <button class="source-tab" data-source="link">↗ Paste a link</button>
-          </div>
-
-          <div id="uploadPanel" class="source-panel active">
-            <label class="dropzone" id="dropzone" for="videoInput">
-              <input id="videoInput" type="file" accept="video/mp4,video/quicktime,video/webm" hidden />
-              <span class="upload-icon">↑</span>
-              <strong>Drop a video here</strong>
-              <p>or click to choose from your computer</p>
-              <small>MP4, MOV or WEBM · up to 500 MB</small>
-            </label>
-            <div id="fileCard" class="file-card hidden"></div>
-          </div>
-
-          <div id="linkPanel" class="source-panel">
-            <div class="link-field">
-              <span>🔗</span>
-              <input id="videoUrl" type="url" placeholder="https://www.tiktok.com/... or https://youtube.com/shorts/..." />
-              <button id="importLinkBtn">Import</button>
-            </div>
-            <p class="hint">Use content you own or have permission to reuse.</p>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="section-heading compact">
-            <div><span class="section-kicker">02 — AI SCRIPT</span><h2>Generate your script</h2><p>Choose language, format and tone. Nexora Ai will write the first draft.</p></div>
-          </div>
-
-          <div class="form-grid">
-            <label><span>Language flow</span>
-              <select id="languagePair">
-                <option value="Chinese to Khmer">中文 → ខ្មែរ</option>
-                <option value="Khmer to Chinese">ខ្មែរ → 中文</option>
-                <option value="English to Khmer" selected>English → ខ្មែរ</option>
-                <option value="Khmer to English">ខ្មែរ → English</option>
-                <option value="English to Chinese">English → 中文</option>
-                <option value="Chinese to English">中文 → English</option>
-              </select>
-            </label>
-            <label><span>Video type</span>
-              <select id="videoType">
-                <option>Product / UGC</option>
-                <option>Education</option>
-                <option>Storytelling</option>
-                <option>News / Explainer</option>
-                <option>Entertainment</option>
-              </select>
-            </label>
-            <label><span>Tone</span>
-              <select id="tone">
-                <option>Natural & engaging</option>
-                <option>Energetic</option>
-                <option>Professional</option>
-                <option>Friendly</option>
-                <option>Story-driven</option>
-              </select>
-            </label>
-            <label><span>Target duration</span>
-              <select id="duration">
-                <option value="15">15 seconds</option>
-                <option value="30" selected>30 seconds</option>
-                <option value="45">45 seconds</option>
-                <option value="60">60 seconds</option>
-              </select>
-            </label>
-          </div>
-
-          <label class="topic-field"><span>What should the video say?</span>
-            <textarea id="brief" rows="3" placeholder="Example: Introduce a useful AI tool for creators, explain the main benefit, and end with a short call to action."></textarea>
-          </label>
-
-          <div class="script-actions">
-            <button class="primary-btn" id="generateScriptBtn"><span>✦</span> Auto Script</button>
-            <span id="scriptStatus" class="muted">Powered by Gemini when an API key is configured.</span>
-          </div>
-
-          <label class="script-editor"><span>Script</span>
-            <textarea id="scriptOutput" rows="10" placeholder="Your generated script will appear here..."></textarea>
-            <small id="wordCount">0 words</small>
-          </label>
-
-          <div class="divider"></div>
-
-          <div class="section-heading compact">
-            <div><span class="section-kicker">03 — VOICE & STYLE</span><h2>Finish the look</h2><p>Choose a voice profile and subtitle style for your short.</p></div>
-          </div>
-
-          <div class="style-grid">
-            <label class="choice-card active-choice"><input type="radio" name="voice" value="Maya" checked><span class="voice-orb">M</span><div><strong>Maya</strong><small>Warm · Female</small></div><b>▶</b></label>
-            <label class="choice-card"><input type="radio" name="voice" value="Kai"><span class="voice-orb">K</span><div><strong>Kai</strong><small>Clear · Male</small></div><b>▶</b></label>
-            <label class="choice-card"><input type="radio" name="voice" value="Auto"><span class="voice-orb">✦</span><div><strong>Auto Voice</strong><small>AI chooses best match</small></div><b>AI</b></label>
-          </div>
-
-          <div class="subtitle-row">
-            <div><span>Subtitle style</span><small>Preview changes instantly.</small></div>
-            <div class="subtitle-options">
-              <button class="subtitle-style active" data-style="bold">BOLD</button>
-              <button class="subtitle-style" data-style="clean">Clean</button>
-              <button class="subtitle-style" data-style="pop">Pop!</button>
-            </div>
-          </div>
-
-          <button class="render-btn" id="renderBtn"><span>✦</span><div><strong>Generate Video</strong><small>Prepare project for rendering</small></div><b>→</b></button>
-        </section>
-
-        <aside class="preview-panel">
-          <div class="preview-head"><div><span class="section-kicker">LIVE PREVIEW</span><h3>Vertical 9:16</h3></div><button id="muteBtn">🔊</button></div>
-          <div class="phone-frame">
-            <div class="phone-notch"></div>
-            <video id="videoPreview" playsinline muted loop></video>
-            <div class="preview-placeholder" id="previewPlaceholder">
-              <div class="spark">✦</div>
-              <strong>Your video preview</strong>
-              <small>Upload a clip to preview it here.</small>
-            </div>
-            <div class="caption-preview bold" id="captionPreview">YOUR AI SCRIPT<br><mark>APPEARS HERE</mark></div>
-            <div class="video-meta"><span>@nexora.ai</span><small>Made with Nexora Ai ✦</small></div>
-          </div>
-          <div class="preview-tools">
-            <button><span>♪</span><small>Music</small></button>
-            <button><span>Aa</span><small>Caption</small></button>
-            <button><span>◫</span><small>9:16</small></button>
-          </div>
-
-          <div class="project-summary">
-            <div class="summary-title"><strong>Project setup</strong><span id="setupState">3/5 ready</span></div>
-            <div><span>Source</span><strong id="summarySource">Not added</strong></div>
-            <div><span>Language</span><strong id="summaryLanguage">English → ខ្មែរ</strong></div>
-            <div><span>Duration</span><strong id="summaryDuration">30 sec</strong></div>
-            <div><span>Voice</span><strong id="summaryVoice">Maya</strong></div>
-          </div>
-        </aside>
+        <div class="hero-proof"><span>⚡ Fast setup</span><span>CC Caption presets</span><span>♫ Voice + music controls</span></div>
       </div>
-    </main>
-  </div>
 
-  <div class="toast" id="toast" role="status"></div>
-  <script src="app.js"></script>
+      <div class="hero-product-card" aria-label="Nexora AI product preview">
+        <div class="product-card-top"><div><b>New video</b><small>Start with short-form links</small></div><span class="credit-chip">10 credits</span></div>
+        <div class="link-stack">
+          <div class="link-input"><span>1</span><div><b>TikTok / Shorts link</b><small>https://...</small></div><i>↗</i></div>
+          <div class="link-input"><span>2</span><div><b>Add another source</b><small>Combine multiple references</small></div><i>＋</i></div>
+        </div>
+        <a class="generate-bar" href="studio.html"><span>✦ Generate with Nexora AI</span><b>→</b></a>
+        <div class="mini-flow"><span class="done">1</span><i></i><span class="done">2</span><i></i><span>3</span><small>Links</small><small>Customize</small><small>Render</small></div>
+      </div>
+    </section>
+
+    <section class="ticker"><div>HOOKS <i>✦</i> SCRIPT <i>✦</i> VOICE <i>✦</i> SUBTITLES <i>✦</i> MUSIC <i>✦</i> SMART WORKFLOW <i>✦</i> NEXORA AI</div></section>
+
+    <section class="section shell" id="workflow">
+      <div class="section-heading center-block">
+        <span class="kicker">HOW IT WORKS</span>
+        <h2>From reference clips to a ready project in three steps.</h2>
+        <p>Simple enough for a first-time creator, structured enough to grow into a complete production workflow.</p>
+      </div>
+      <div class="workflow-grid">
+        <article><span class="step-num">01</span><div class="feature-symbol">↗</div><h3>Add your sources</h3><p>Upload your own clip or add short-form links you have permission to use.</p></article>
+        <article><span class="step-num">02</span><div class="feature-symbol">✦</div><h3>Customize with AI</h3><p>Generate or edit the script, then choose voice, captions, music, language and hook style.</p></article>
+        <article><span class="step-num">03</span><div class="feature-symbol">⚡</div><h3>Prepare the render</h3><p>Review the 9:16 preview and send the project into the generation pipeline.</p></article>
+      </div>
+    </section>
+
+    <section class="section dark-section" id="features">
+      <div class="shell">
+        <div class="section-heading split-heading">
+          <div><span class="kicker">CREATOR TOOLKIT</span><h2>Everything you need in one focused studio.</h2></div>
+          <p>Nexora AI keeps the creative controls together so you spend less time jumping between separate tools.</p>
+        </div>
+        <div class="feature-grid">
+          <article><div class="feature-symbol">✦</div><h3>AI Script</h3><p>Generate, translate and tighten narration for short-form pacing.</p></article>
+          <article><div class="feature-symbol">◉</div><h3>AI Voice</h3><p>Select narrator profiles now and connect a real TTS provider next.</p></article>
+          <article><div class="feature-symbol">CC</div><h3>Subtitle Styles</h3><p>Preview bold, clean and pop caption looks for vertical video.</p></article>
+          <article><div class="feature-symbol">♫</div><h3>Background Music</h3><p>Choose a music mood and keep narration controls in the same project.</p></article>
+          <article><div class="feature-symbol">⚡</div><h3>Hook Assistant</h3><p>Pick a hook style that helps structure the opening seconds.</p></article>
+          <article><div class="feature-symbol">▦</div><h3>Project Workspace</h3><p>Save draft settings locally and continue building cloud history later.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section shell showcase">
+      <div class="showcase-copy"><span class="kicker">NEXORA STUDIO</span><h2>A clean workspace built around the video.</h2><p>The editor is designed for 9:16 creation first, with source management and creative settings on the left and a live preview on the right.</p><a class="primary-btn big" href="studio.html">Launch Studio <span>→</span></a></div>
+      <div class="mock-app">
+        <div class="mock-top"><span></span><span></span><span></span><b>Project / New short</b></div>
+        <div class="mock-body"><aside><i>N</i><i>＋</i><i>✦</i><i>CC</i><i>♫</i></aside><div class="mock-controls"><small>SOURCE LINKS</small><div></div><div></div><small>AI SCRIPT</small><div class="long"></div><div class="long"></div><button>Generate project →</button></div><div class="mock-preview"><div class="mock-phone"><b>NEXORA AI</b><strong>YOUR STORY<br><mark>STARTS HERE</mark></strong></div><div class="mock-timeline"><i></i><i></i><i></i></div></div></div>
+      </div>
+    </section>
+
+    <section class="section shell" id="pricing">
+      <div class="section-heading center-block"><span class="kicker">PRICING</span><h2>Start simple. Upgrade when you need more.</h2><p>These are placeholder plans for the product prototype and can be changed later.</p></div>
+      <div class="pricing-grid">
+        <article class="price-card"><span>START</span><h3>$9<small>/month</small></h3><p>For testing the workflow.</p><a class="secondary-btn full" href="studio.html">Choose Start</a><ul><li>✓ 60 generations / month</li><li>✓ 4 voice presets</li><li>✓ 3 subtitle styles</li><li>✓ Script enhancer</li></ul></article>
+        <article class="price-card featured"><div class="popular-badge">MOST POPULAR</div><span>CREATOR</span><h3>$19<small>/month</small></h3><p>For active creators.</p><a class="primary-btn full" href="studio.html">Choose Creator</a><ul><li>✓ 180 generations / month</li><li>✓ All voice presets</li><li>✓ Hook assistant</li><li>✓ More music presets</li></ul></article>
+        <article class="price-card"><span>STUDIO</span><h3>$39<small>/month</small></h3><p>For higher output.</p><a class="secondary-btn full" href="studio.html">Choose Studio</a><ul><li>✓ 500 generations / month</li><li>✓ Priority processing</li><li>✓ Brand presets</li><li>✓ Team-ready roadmap</li></ul></article>
+      </div>
+    </section>
+
+    <section class="faq section shell">
+      <div class="section-heading center-block"><span class="kicker">FAQ</span><h2>Built to grow from prototype to full AI video engine.</h2></div>
+      <details><summary>Can Nexora AI generate real videos already?</summary><p>The current version provides the creator interface and Gemini script generation. Full rendering, TTS, transcription and media composition are the next backend modules.</p></details>
+      <details><summary>Can I use Khmer, English and Chinese?</summary><p>Yes. The current script workflow includes six translation directions across Khmer, English and Chinese.</p></details>
+      <details><summary>Can I change the design later?</summary><p>Yes. The project is separated into simple HTML, CSS, JavaScript and API files so we can keep changing the interface and features.</p></details>
+    </section>
+
+    <section class="final-cta shell"><div><span class="kicker light">NEXORA AI</span><h2>Turn ideas into video projects faster.</h2><p>Open the creator studio and start with version 2.</p></div><a class="light-btn" href="studio.html">Open Studio <span>→</span></a></section>
+  </main>
+
+  <footer class="landing-footer shell"><a class="brand" href="index.html"><span class="brand-mark">N</span><span class="brand-copy"><strong>Nexora</strong><small>AI</small></span></a><p>Original AI-assisted short-video creator workspace.</p><span>© 2026 Nexora AI</span></footer>
 </body>
 </html>
