@@ -1,6 +1,6 @@
 # Nexora Dub.Ai — Clean-room Android Starter
 
-Nexora Dub.Ai is an independent Flutter starter for an Android dubbing workspace. This repository does not contain Speech Pro code, assets, domains, IP addresses, login/session endpoints, Telegram links, compiled libraries, or proprietary branding.
+Nexora Dub.Ai is an independent Flutter starter for an Android dubbing workspace. This repository uses its own app identity, source tree, UI and Android package, with no third-party backend configured by default.
 
 ## Identity
 - App name: **Nexora Dub.Ai**
@@ -24,7 +24,7 @@ After a successful run, download the artifact named **Nexora-DubAI-Android**. It
 - `Nexora-DubAI-v1.0.0.apk`
 - `SHA256.txt`
 
-The workflow creates a fresh Flutter Android shell in CI, changes the generated Android identity to `com.nexora.dubai`, builds a release APK, and publishes the result as a GitHub Actions artifact.
+The workflow creates a fresh Flutter Android shell in CI, applies the Android identity `com.nexora.dubai`, builds a release APK, and publishes the result as a GitHub Actions artifact.
 
 ## Development
 ```bash
@@ -32,5 +32,5 @@ flutter pub get
 flutter run
 ```
 
-## Safety / ownership
-Only connect APIs, servers, voice models, media providers, and other services that you own or are authorized to use. Do not put secret keys directly in this public repository.
+## Security
+Only connect APIs, servers, voice models, media providers and other services that you own or are authorized to use. Do not put secret keys directly in this public repository.
