@@ -1,4 +1,16 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import 'project_workspace_screen.dart';
+import 'settings_screen.dart';
+
+class ProjectEntry {
+  final String name;
+  final int size;
+
+  const ProjectEntry(this.name, this.size);
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,10 +29,152 @@ class _HomeScreenState extends State<HomeScreen> {
   bool voice = true;
   bool effect = true;
 
+  final List<ProjectEntry> projects = [];
+  ProjectEntry? currentProject;
+
   void _toast(String text) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(text)));
+  }
+
+  Future<void> _openWorkspace(ProjectEntry project, {int initialStep = 0}) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ProjectWorkspaceScreen(
+          fileName: project.name,
+          fileSize: project.size,
+          initialStep: initialStep,
+        ),
+      ),
+    );
+  }
+
+  Future<ProjectEntry?> _pickMedia({int initialStep = 0, bool openWorkspace = true}) async {
+    try {
+      final file = await FilePicker.pickFile(
+        type: FileType.custom,
+        allowedExtensions: ['mp4', 'mov', 'mkv', 'webm', 'mp3', 'wav', 'm4a', 'aac'],
+      );
+      if (!mounted || file == null) return null;
+
+      final fileSize = await file.length();
+      if (!mounted) return null;
+
+      final project = ProjectEntry(file.name, fileSize);
+      setState(() {
+        currentProject = project;
+        projects.removeWhere((item) => item.name == project.name && item.size == project.size);
+        projects.insert(0, project);
+      });
+
+      if (openWorkspace) {
+        await _openWorkspace(project, initialStep: initialStep);
+      } else {
+        _toast('Selected: ${project.name}');
+      }
+      return project;
+    } catch (error) {
+      if (!mounted) return null;
+      _toast('Could not open media: $error');
+      return null;
+    }
+  }
+
+  Future<void> _pickSrt() async {
+    try {
+      final file = await FilePicker.pickFile(
+        type: FileType.custom,
+        allowedExtensions: ['srt'],
+      );
+      if (!mounted || file == null) return;
+      _toast('SRT selected: ${file.name}');
+    } catch (error) {
+      if (!mounted) return;
+      _toast('Could not open SRT file: $error');
+    }
+  }
+
+  Future<void> _openCurrentOrPick({required int step}) async {
+    final project = currentProject;
+    if (project != null) {
+      await _openWorkspace(project, initialStep: step);
+      return;
+    }
+    await _pickMedia(initialStep: step);
+  }
+
+  Future<void> _prepareMediaTool(String toolName) async {
+    ProjectEntry? project = currentProject;
+    project ??= await _pickMedia(openWorkspace: false);
+    if (!mounted || project == null) return;
+    _toast('$toolName ready for ${project.name}. Connect an authorized media engine to process it.');
+  }
+
+  void _openSettings() {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
+  }
+
+  void _showHistory() {
+    if (projects.isEmpty) {
+      _toast('No project history yet. Choose a media file first.');
+      return;
+    }
+
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: ListView.separated(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+          itemCount: projects.length,
+          separatorBuilder: (_, __) => const Divider(height: 1),
+          itemBuilder: (_, index) {
+            final project = projects[index];
+            return ListTile(
+              leading: const CircleAvatar(child: Icon(Icons.movie_outlined)),
+              title: Text(project.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+              subtitle: Text('${(project.size / (1024 * 1024)).toStringAsFixed(1)} MB'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                setState(() => currentProject = project);
+                _openWorkspace(project);
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showVoiceProfiles() async {
+    const profiles = ['Nexora Natural 1', 'Nexora Natural 2', 'Warm Narrator', 'Clear Studio'];
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+          children: [
+            const Text('Voice Profiles', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+            const SizedBox(height: 8),
+            ...profiles.map(
+              (profile) => ListTile(
+                leading: const CircleAvatar(child: Icon(Icons.record_voice_over_outlined)),
+                title: Text(profile),
+                subtitle: const Text('Tap to select'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.pop(sheetContext, profile),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (!mounted || selected == null) return;
+    _toast('$selected selected. Connect an authorized TTS provider for real audio preview.');
   }
 
   Widget _section({required Widget child, Color? borderColor}) {
@@ -55,7 +209,12 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         onPressed: onPressed,
         icon: Icon(icon, size: 21),
-        label: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800)),
+        label: Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontWeight: FontWeight.w800),
+        ),
       ),
     );
   }
@@ -70,8 +229,14 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
         title: const Text('Nexora Dub.Ai Plus', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 22)),
         actions: [
-          const Center(child: Padding(padding: EdgeInsets.only(right: 8), child: Text('🔑 3 Keys', style: TextStyle(color: Color(0xFFFFD84D), fontWeight: FontWeight.w800)))),
-          IconButton(onPressed: () => _toast('Exit button ready'), icon: const Icon(Icons.logout_rounded)),
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.only(right: 8),
+              child: Text('🔑 API', style: TextStyle(color: Color(0xFFFFD84D), fontWeight: FontWeight.w800)),
+            ),
+          ),
+          IconButton(onPressed: _openSettings, tooltip: 'Settings', icon: const Icon(Icons.settings_rounded)),
+          IconButton(onPressed: SystemNavigator.pop, tooltip: 'Exit', icon: const Icon(Icons.logout_rounded)),
         ],
       ),
       body: SafeArea(
@@ -87,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       const Text('⭐ Preset / សំឡេង', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
                       const Spacer(),
                       OutlinedButton.icon(
-                        onPressed: () => _toast('Preset history'),
+                        onPressed: _showHistory,
                         icon: const Icon(Icons.history, size: 18),
                         label: const Text('History'),
                       ),
@@ -104,9 +269,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Expanded(child: _button(label: 'Preview Voice', icon: Icons.volume_up_rounded, onPressed: () => _toast('Voice preview'))),
+                      Expanded(
+                        child: _button(
+                          label: 'Preview Voice',
+                          icon: Icons.volume_up_rounded,
+                          onPressed: _showVoiceProfiles,
+                        ),
+                      ),
                       const SizedBox(width: 8),
-                      Expanded(child: _button(label: 'Upload', icon: Icons.cloud_upload_rounded, background: const Color(0xFFFF5964), onPressed: () => _toast('Upload picker will open in full engine build'))),
+                      Expanded(
+                        child: _button(
+                          label: 'Upload',
+                          icon: Icons.cloud_upload_rounded,
+                          background: const Color(0xFFFF5964),
+                          onPressed: () => _pickMedia(),
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -120,14 +298,40 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 14),
                   SizedBox(
                     width: double.infinity,
-                    child: _button(label: 'Import SRT Subtitle', icon: Icons.note_add_rounded, height: 68, background: const Color(0xFF2855D9), onPressed: () => _toast('SRT import selected')),
+                    child: _button(
+                      label: 'Import SRT Subtitle',
+                      icon: Icons.note_add_rounded,
+                      height: 68,
+                      background: const Color(0xFF2855D9),
+                      onPressed: _pickSrt,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Expanded(child: _button(label: 'Gemini', icon: Icons.auto_awesome_rounded, background: const Color(0xFF8539DB), onPressed: () => setState(() => translator = 'Gemini'))),
+                      Expanded(
+                        child: _button(
+                          label: 'Gemini',
+                          icon: Icons.auto_awesome_rounded,
+                          background: const Color(0xFF8539DB),
+                          onPressed: () {
+                            setState(() => translator = 'Gemini');
+                            _toast('Gemini selected. Add your authorized API key in Settings.');
+                          },
+                        ),
+                      ),
                       const SizedBox(width: 8),
-                      Expanded(child: _button(label: 'Google', icon: Icons.translate_rounded, background: const Color(0xFF0D9CCB), onPressed: () => setState(() => translator = 'Google'))),
+                      Expanded(
+                        child: _button(
+                          label: 'Google',
+                          icon: Icons.translate_rounded,
+                          background: const Color(0xFF0D9CCB),
+                          onPressed: () {
+                            setState(() => translator = 'Google');
+                            _toast('Google selected. Add your authorized API configuration in Settings.');
+                          },
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -146,7 +350,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       const Spacer(),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(14), border: Border.all(color: const Color(0xFFB834D7))),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: const Color(0xFFB834D7)),
+                        ),
                         child: const Text('📱 MOBILE SUITE', style: TextStyle(color: Color(0xFFE24EF6), fontWeight: FontWeight.w900)),
                       ),
                     ],
@@ -154,27 +361,89 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      Expanded(flex: 6, child: _button(label: 'Browse File', icon: Icons.file_open_rounded, background: const Color(0xFF12A9C8), height: 64, onPressed: () => _toast('Browse video/audio'))),
+                      Expanded(
+                        flex: 6,
+                        child: _button(
+                          label: currentProject == null ? 'Browse File' : 'Change File',
+                          icon: Icons.file_open_rounded,
+                          background: const Color(0xFF12A9C8),
+                          height: 64,
+                          onPressed: () => _pickMedia(),
+                        ),
+                      ),
                       const SizedBox(width: 8),
-                      Expanded(flex: 5, child: _button(label: 'API Keys (2/3)', icon: Icons.key_rounded, height: 64, onPressed: () => _toast('API key manager'))),
+                      Expanded(
+                        flex: 5,
+                        child: _button(
+                          label: 'API Keys',
+                          icon: Icons.key_rounded,
+                          height: 64,
+                          onPressed: _openSettings,
+                        ),
+                      ),
                     ],
                   ),
+                  if (currentProject != null) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      'Selected: ${currentProject!.name}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: Color(0xFF65E8E8), fontWeight: FontWeight.w800),
+                    ),
+                  ],
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Expanded(child: _button(label: 'Export', icon: Icons.movie_rounded, background: const Color(0xFF12A779), height: 52, onPressed: () => _toast('Export'))),
+                      Expanded(
+                        child: _button(
+                          label: 'Export',
+                          icon: Icons.movie_rounded,
+                          background: const Color(0xFF12A779),
+                          height: 52,
+                          onPressed: () => _openCurrentOrPick(step: 3),
+                        ),
+                      ),
                       const SizedBox(width: 5),
-                      Expanded(child: _button(label: 'Split', icon: Icons.content_cut_rounded, background: const Color(0xFF9C4E00), height: 52, onPressed: () => _toast('Split audio'))),
+                      Expanded(
+                        child: _button(
+                          label: 'Split',
+                          icon: Icons.content_cut_rounded,
+                          background: const Color(0xFF9C4E00),
+                          height: 52,
+                          onPressed: () => _prepareMediaTool('Split audio'),
+                        ),
+                      ),
                       const SizedBox(width: 5),
-                      Expanded(child: _button(label: 'STT Auto', icon: Icons.mic_rounded, background: const Color(0xFF17485A), height: 52, onPressed: () => _toast('Automatic STT'))),
+                      Expanded(
+                        child: _button(
+                          label: 'STT Auto',
+                          icon: Icons.mic_rounded,
+                          background: const Color(0xFF17485A),
+                          height: 52,
+                          onPressed: () => _openCurrentOrPick(step: 0),
+                        ),
+                      ),
                       const SizedBox(width: 5),
-                      Expanded(child: _button(label: 'Vocal', icon: Icons.graphic_eq_rounded, background: const Color(0xFF6D1FB2), height: 52, onPressed: () => _toast('Vocal tool'))),
+                      Expanded(
+                        child: _button(
+                          label: 'Vocal',
+                          icon: Icons.graphic_eq_rounded,
+                          background: const Color(0xFF6D1FB2),
+                          height: 52,
+                          onPressed: () => _openCurrentOrPick(step: 2),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: const Color(0xFF101D2E), borderRadius: BorderRadius.circular(18), border: Border.all(color: const Color(0xFF0C6C77))),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF101D2E),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: const Color(0xFF0C6C77)),
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -197,14 +466,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
-                    child: _button(label: '🎵 Export 1 Click', icon: Icons.auto_fix_high_rounded, background: const Color(0xFF0AB079), height: 68, onPressed: () => _toast('1-Click Export started')),
+                    child: _button(
+                      label: '🎵 Export 1 Click',
+                      icon: Icons.auto_fix_high_rounded,
+                      background: const Color(0xFF0AB079),
+                      height: 68,
+                      onPressed: () => _openCurrentOrPick(step: 3),
+                    ),
                   ),
                 ],
               ),
             ),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 8),
-              child: Text('Nexora independent mobile UI • AI services are connected only when you add your own authorized API keys.', textAlign: TextAlign.center, style: TextStyle(color: Color(0xFF7F8FA8), fontSize: 12)),
+              child: Text(
+                'Nexora independent mobile UI • AI services are connected only when you add your own authorized API keys.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Color(0xFF7F8FA8), fontSize: 12),
+              ),
             ),
           ],
         ),
@@ -215,7 +494,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _presetDrop() {
     return DropdownButtonFormField<String>(
       initialValue: preset,
-      decoration: const InputDecoration(filled: true, fillColor: Color(0xFF2D394C), border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(14)), borderSide: BorderSide.none)),
+      decoration: const InputDecoration(
+        filled: true,
+        fillColor: Color(0xFF2D394C),
+        border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(14)), borderSide: BorderSide.none),
+      ),
       items: const ['YouTube', 'TikTok', 'Facebook', 'Movie'].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
       onChanged: (v) => setState(() => preset = v ?? preset),
     );
@@ -224,7 +507,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _langDrop() {
     return DropdownButtonFormField<String>(
       initialValue: targetLanguage,
-      decoration: const InputDecoration(filled: true, fillColor: Color(0xFF2D394C), border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(14)), borderSide: BorderSide.none)),
+      decoration: const InputDecoration(
+        filled: true,
+        fillColor: Color(0xFF2D394C),
+        border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(14)), borderSide: BorderSide.none),
+      ),
       items: const ['KH', 'EN', 'CN', 'FR', 'ES', 'DE', 'RU'].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
       onChanged: (v) => setState(() => targetLanguage = v ?? targetLanguage),
     );
@@ -238,7 +525,10 @@ class _HomeScreenState extends State<HomeScreen> {
       label: Text(label),
       selectedColor: const Color(0xFF0B6770),
       side: BorderSide(color: value ? const Color(0xFF15E5E8) : const Color(0xFF566377)),
-      labelStyle: TextStyle(color: value ? const Color(0xFF54F5F4) : const Color(0xFF9AA6B8), fontWeight: FontWeight.w800),
+      labelStyle: TextStyle(
+        color: value ? const Color(0xFF54F5F4) : const Color(0xFF9AA6B8),
+        fontWeight: FontWeight.w800,
+      ),
     );
   }
 }
