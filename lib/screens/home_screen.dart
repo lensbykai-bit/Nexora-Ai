@@ -23,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> openNewProject({int initialStep = 0}) async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['mp4', 'mov', 'mkv', 'webm', 'mp3', 'wav', 'm4a', 'aac'],
       );
