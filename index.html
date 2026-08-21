@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Nexora Ai — AI short-video script and creator workspace." />
+  <title>Nexora Ai — AI Video Creator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Khmer:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#" aria-label="Nexora Ai home">
+        <span class="brand-mark">N</span>
+        <span class="brand-copy"><strong>Nexora</strong><small>AI STUDIO</small></span>
+      </a>
+
+      <nav class="nav-group" aria-label="Main navigation">
+        <button class="nav-item active" data-page="create"><span>✦</span> Create Video</button>
+        <button class="nav-item" data-page="projects"><span>▦</span> My Projects</button>
+        <button class="nav-item" data-page="templates"><span>◈</span> Templates <em>NEW</em></button>
+        <button class="nav-item" data-page="voices"><span>♫</span> AI Voices</button>
+      </nav>
+
+      <div class="sidebar-spacer"></div>
+      <div class="usage-card">
+        <div class="usage-top"><span>Monthly credits</span><strong>68%</strong></div>
+        <div class="usage-track"><i></i></div>
+        <small>680 / 1,000 credits used</small>
+        <button class="upgrade-btn">Upgrade plan</button>
+      </div>
+      <button class="nav-item"><span>?</span> Help & Guides</button>
+      <button class="nav-item"><span>⚙</span> Settings</button>
+      <div class="profile-chip">
+        <div class="avatar">N</div>
+        <div><strong>Nexora Creator</strong><small>Free workspace</small></div>
+        <span>⋯</span>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div>
+          <span class="eyebrow">NEXORA AI / CREATE</span>
+          <h1>Create a viral-ready video</h1>
+        </div>
+        <div class="top-actions">
+          <span class="status-dot">● API Ready</span>
+          <button class="ghost-btn" id="saveDraftBtn">Save draft</button>
+        </div>
+      </header>
+
+      <section class="stepper" aria-label="Creation steps">
+        <div class="step active"><span>1</span><div><strong>Import</strong><small>Add your source</small></div></div>
+        <i></i>
+        <div class="step"><span>2</span><div><strong>Script</strong><small>Generate with AI</small></div></div>
+        <i></i>
+        <div class="step"><span>3</span><div><strong>Voice</strong><small>Choose narrator</small></div></div>
+        <i></i>
+        <div class="step"><span>4</span><div><strong>Style</strong><small>Subtitle & music</small></div></div>
+        <i></i>
+        <div class="step"><span>5</span><div><strong>Export</strong><small>Render video</small></div></div>
+      </section>
+
+      <div class="content-grid">
+        <section class="creator-panel">
+          <div class="section-heading">
+            <div><span class="section-kicker">01 — SOURCE</span><h2>Start from a video</h2><p>Upload your clip or paste a TikTok / YouTube Shorts link.</p></div>
+            <span class="secure-badge">🔒 Private</span>
+          </div>
+
+          <div class="source-tabs" role="tablist">
+            <button class="source-tab active" data-source="upload">↑ Upload video</button>
+            <button class="source-tab" data-source="link">↗ Paste a link</button>
+          </div>
+
+          <div id="uploadPanel" class="source-panel active">
+            <label class="dropzone" id="dropzone" for="videoInput">
+              <input id="videoInput" type="file" accept="video/mp4,video/quicktime,video/webm" hidden />
+              <span class="upload-icon">↑</span>
+              <strong>Drop a video here</strong>
+              <p>or click to choose from your computer</p>
+              <small>MP4, MOV or WEBM · up to 500 MB</small>
+            </label>
+            <div id="fileCard" class="file-card hidden"></div>
+          </div>
+
+          <div id="linkPanel" class="source-panel">
+            <div class="link-field">
+              <span>🔗</span>
+              <input id="videoUrl" type="url" placeholder="https://www.tiktok.com/... or https://youtube.com/shorts/..." />
+              <button id="importLinkBtn">Import</button>
+            </div>
+            <p class="hint">Use content you own or have permission to reuse.</p>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="section-heading compact">
+            <div><span class="section-kicker">02 — AI SCRIPT</span><h2>Generate your script</h2><p>Choose language, format and tone. Nexora Ai will write the first draft.</p></div>
+          </div>
+
+          <div class="form-grid">
+            <label><span>Language flow</span>
+              <select id="languagePair">
+                <option value="Chinese to Khmer">中文 → ខ្មែរ</option>
+                <option value="Khmer to Chinese">ខ្មែរ → 中文</option>
+                <option value="English to Khmer" selected>English → ខ្មែរ</option>
+                <option value="Khmer to English">ខ្មែរ → English</option>
+                <option value="English to Chinese">English → 中文</option>
+                <option value="Chinese to English">中文 → English</option>
+              </select>
+            </label>
+            <label><span>Video type</span>
+              <select id="videoType">
+                <option>Product / UGC</option>
+                <option>Education</option>
+                <option>Storytelling</option>
+                <option>News / Explainer</option>
+                <option>Entertainment</option>
+              </select>
+            </label>
+            <label><span>Tone</span>
+              <select id="tone">
+                <option>Natural & engaging</option>
+                <option>Energetic</option>
+                <option>Professional</option>
+                <option>Friendly</option>
+                <option>Story-driven</option>
+              </select>
+            </label>
+            <label><span>Target duration</span>
+              <select id="duration">
+                <option value="15">15 seconds</option>
+                <option value="30" selected>30 seconds</option>
+                <option value="45">45 seconds</option>
+                <option value="60">60 seconds</option>
+              </select>
+            </label>
+          </div>
+
+          <label class="topic-field"><span>What should the video say?</span>
+            <textarea id="brief" rows="3" placeholder="Example: Introduce a useful AI tool for creators, explain the main benefit, and end with a short call to action."></textarea>
+          </label>
+
+          <div class="script-actions">
+            <button class="primary-btn" id="generateScriptBtn"><span>✦</span> Auto Script</button>
+            <span id="scriptStatus" class="muted">Powered by Gemini when an API key is configured.</span>
+          </div>
+
+          <label class="script-editor"><span>Script</span>
+            <textarea id="scriptOutput" rows="10" placeholder="Your generated script will appear here..."></textarea>
+            <small id="wordCount">0 words</small>
+          </label>
+
+          <div class="divider"></div>
+
+          <div class="section-heading compact">
+            <div><span class="section-kicker">03 — VOICE & STYLE</span><h2>Finish the look</h2><p>Choose a voice profile and subtitle style for your short.</p></div>
+          </div>
+
+          <div class="style-grid">
+            <label class="choice-card active-choice"><input type="radio" name="voice" value="Maya" checked><span class="voice-orb">M</span><div><strong>Maya</strong><small>Warm · Female</small></div><b>▶</b></label>
+            <label class="choice-card"><input type="radio" name="voice" value="Kai"><span class="voice-orb">K</span><div><strong>Kai</strong><small>Clear · Male</small></div><b>▶</b></label>
+            <label class="choice-card"><input type="radio" name="voice" value="Auto"><span class="voice-orb">✦</span><div><strong>Auto Voice</strong><small>AI chooses best match</small></div><b>AI</b></label>
+          </div>
+
+          <div class="subtitle-row">
+            <div><span>Subtitle style</span><small>Preview changes instantly.</small></div>
+            <div class="subtitle-options">
+              <button class="subtitle-style active" data-style="bold">BOLD</button>
+              <button class="subtitle-style" data-style="clean">Clean</button>
+              <button class="subtitle-style" data-style="pop">Pop!</button>
+            </div>
+          </div>
+
+          <button class="render-btn" id="renderBtn"><span>✦</span><div><strong>Generate Video</strong><small>Prepare project for rendering</small></div><b>→</b></button>
+        </section>
+
+        <aside class="preview-panel">
+          <div class="preview-head"><div><span class="section-kicker">LIVE PREVIEW</span><h3>Vertical 9:16</h3></div><button id="muteBtn">🔊</button></div>
+          <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <video id="videoPreview" playsinline muted loop></video>
+            <div class="preview-placeholder" id="previewPlaceholder">
+              <div class="spark">✦</div>
+              <strong>Your video preview</strong>
+              <small>Upload a clip to preview it here.</small>
+            </div>
+            <div class="caption-preview bold" id="captionPreview">YOUR AI SCRIPT<br><mark>APPEARS HERE</mark></div>
+            <div class="video-meta"><span>@nexora.ai</span><small>Made with Nexora Ai ✦</small></div>
+          </div>
+          <div class="preview-tools">
+            <button><span>♪</span><small>Music</small></button>
+            <button><span>Aa</span><small>Caption</small></button>
+            <button><span>◫</span><small>9:16</small></button>
+          </div>
+
+          <div class="project-summary">
+            <div class="summary-title"><strong>Project setup</strong><span id="setupState">3/5 ready</span></div>
+            <div><span>Source</span><strong id="summarySource">Not added</strong></div>
+            <div><span>Language</span><strong id="summaryLanguage">English → ខ្មែរ</strong></div>
+            <div><span>Duration</span><strong id="summaryDuration">30 sec</strong></div>
+            <div><span>Voice</span><strong id="summaryVoice">Maya</strong></div>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
