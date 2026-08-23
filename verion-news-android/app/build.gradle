@@ -12,3 +12,5 @@ android {
         versionName '1.0.0'
     }
 }
+
+// VERION NEWS APK build trigger
