@@ -36,9 +36,9 @@ public class MainActivity extends Activity {
     private int articleClicks = 0;
     private static final String HOME = "https://verionnewss.blogspot.com/";
 
-    // Official Google Android test ad units. Test build only; these do not generate revenue.
-    private static final String BANNER_ID = "ca-app-pub-3940256099942544/6300978111";
-    private static final String INTERSTITIAL_ID = "ca-app-pub-3940256099942544/1033173712";
+    // VERION NEWS production AdMob units.
+    private static final String BANNER_ID = "ca-app-pub-4901980834448866/6731694725";
+    private static final String INTERSTITIAL_ID = "ca-app-pub-4901980834448866/3267976911";
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -51,7 +51,6 @@ public class MainActivity extends Activity {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(Color.rgb(7,17,31));
-
         applySafeAreaInsets(root);
 
         FrameLayout webContainer = new FrameLayout(this);
@@ -68,28 +67,21 @@ public class MainActivity extends Activity {
 
         FrameLayout bannerHost = new FrameLayout(this);
         bannerHost.setBackgroundColor(Color.WHITE);
-        LinearLayout.LayoutParams hostParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        root.addView(bannerHost, hostParams);
+        root.addView(bannerHost, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         AdView banner = new AdView(this);
         banner.setAdUnitId(BANNER_ID);
         FrameLayout.LayoutParams bannerParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         bannerParams.gravity = Gravity.CENTER;
         bannerHost.addView(banner, bannerParams);
-
         setContentView(root);
 
-        // Anchored adaptive banner: automatically fits phones/tablets and portrait/landscape widths.
         bannerHost.post(() -> {
             float density = getResources().getDisplayMetrics().density;
             int widthPx = bannerHost.getWidth() - bannerHost.getPaddingLeft() - bannerHost.getPaddingRight();
-            if (widthPx <= 0) {
-                DisplayMetrics dm = getResources().getDisplayMetrics();
-                widthPx = dm.widthPixels;
-            }
+            if (widthPx <= 0) widthPx = getResources().getDisplayMetrics().widthPixels;
             int adWidthDp = Math.max(320, (int) (widthPx / density));
-            AdSize adaptive = AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidthDp);
-            banner.setAdSize(adaptive);
+            banner.setAdSize(AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidthDp));
             banner.loadAd(new AdRequest.Builder().build());
         });
 
@@ -102,7 +94,7 @@ public class MainActivity extends Activity {
         s.setBuiltInZoomControls(false);
         s.setDisplayZoomControls(false);
         s.setMediaPlaybackRequiresUserGesture(true);
-        s.setUserAgentString(s.getUserAgentString() + " VERIONNEWS-Android/1.4.2-TEST");
+        s.setUserAgentString(s.getUserAgentString() + " VERIONNEWS-Android/1.5");
 
         webView.setWebChromeClient(new android.webkit.WebChromeClient() {
             @Override public void onProgressChanged(WebView view, int p) {
@@ -110,7 +102,6 @@ public class MainActivity extends Activity {
                 progress.setVisibility(p >= 100 ? View.GONE : View.VISIBLE);
             }
         });
-
         webView.setWebViewClient(new WebViewClient() {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri u = request.getUrl();
@@ -120,7 +111,7 @@ public class MainActivity extends Activity {
                     if (path.matches(".*/\\d{4}/\\d{2}/.*")) {
                         articleClicks++;
                         if (articleClicks % 3 == 0 && interstitialAd != null) {
-                            final String target = u.toString();
+                            String target = u.toString();
                             interstitialAd.show(MainActivity.this);
                             interstitialAd = null;
                             loadInterstitial();
@@ -133,36 +124,25 @@ public class MainActivity extends Activity {
                 try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (Exception ignored) {}
                 return true;
             }
-
             @Override public void onReceivedError(WebView view, int code, String desc, String failingUrl) {
                 Toast.makeText(MainActivity.this, "Connection error. Please check your internet.", Toast.LENGTH_SHORT).show();
             }
         });
-
         if (state == null) webView.loadUrl(HOME); else webView.restoreState(state);
     }
 
     private void applySafeAreaInsets(View root) {
         root.setOnApplyWindowInsetsListener((v, windowInsets) -> {
-            int left;
-            int top;
-            int right;
-            int bottom;
-
+            int left, top, right, bottom;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                Insets systemBars = windowInsets.getInsets(
-                        WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
-                left = systemBars.left;
-                top = systemBars.top;
-                right = systemBars.right;
-                bottom = systemBars.bottom;
+                Insets bars = windowInsets.getInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+                left = bars.left; top = bars.top; right = bars.right; bottom = bars.bottom;
             } else {
                 left = windowInsets.getSystemWindowInsetLeft();
                 top = windowInsets.getSystemWindowInsetTop();
                 right = windowInsets.getSystemWindowInsetRight();
                 bottom = windowInsets.getSystemWindowInsetBottom();
             }
-
             v.setPadding(left, top, right, bottom);
             return windowInsets;
         });
@@ -176,17 +156,7 @@ public class MainActivity extends Activity {
         });
     }
 
-    @Override protected void onResume() {
-        super.onResume();
-        if (webView != null && webView.getUrl() != null) webView.reload();
-    }
-
-    @Override protected void onSaveInstanceState(Bundle out) {
-        webView.saveState(out);
-        super.onSaveInstanceState(out);
-    }
-
-    @Override public void onBackPressed() {
-        if (webView.canGoBack()) webView.goBack(); else super.onBackPressed();
-    }
+    @Override protected void onResume() { super.onResume(); if (webView != null && webView.getUrl() != null) webView.reload(); }
+    @Override protected void onSaveInstanceState(Bundle out) { webView.saveState(out); super.onSaveInstanceState(out); }
+    @Override public void onBackPressed() { if (webView.canGoBack()) webView.goBack(); else super.onBackPressed(); }
 }
