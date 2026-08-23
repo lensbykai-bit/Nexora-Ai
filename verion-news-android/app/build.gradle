@@ -8,8 +8,8 @@ android {
         applicationId 'com.verion.news'
         minSdk 24
         targetSdk 36
-        versionCode 6
-        versionName '1.4.1'
+        versionCode 7
+        versionName '1.4.2'
     }
 }
 
@@ -17,4 +17,4 @@ dependencies {
     implementation 'com.google.android.gms:play-services-ads:24.5.0'
 }
 
-// VERION NEWS v1.4.1: AdMob test-ad verification build.
+// VERION NEWS v1.4.2: responsive safe-area + adaptive banner test build.
