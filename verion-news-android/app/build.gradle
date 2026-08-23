@@ -8,9 +8,9 @@ android {
         applicationId 'com.verion.news'
         minSdk 24
         targetSdk 36
-        versionCode 3
-        versionName '1.2.0'
+        versionCode 4
+        versionName '1.3.0'
     }
 }
 
-// VERION NEWS v1.2 official user-supplied logo
+// VERION NEWS v1.3 auto-refreshes Blogger news when the app is opened/resumed.
