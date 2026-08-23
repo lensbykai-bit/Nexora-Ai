@@ -30,14 +30,14 @@ public class MainActivity extends Activity {
     private InterstitialAd interstitialAd;
     private int articleClicks = 0;
     private static final String HOME = "https://verionnewss.blogspot.com/";
-    private static final String BANNER_ID = "ca-app-pub-4901980834448866/6731694725";
-    private static final String INTERSTITIAL_ID = "ca-app-pub-4901980834448866/3267976911";
+    // Official Google Android test ad units. Test build only; these do not generate revenue.
+    private static final String BANNER_ID = "ca-app-pub-3940256099942544/6300978111";
+    private static final String INTERSTITIAL_ID = "ca-app-pub-3940256099942544/1033173712";
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         getWindow().setStatusBarColor(Color.rgb(7,17,31));
         getWindow().setNavigationBarColor(Color.rgb(7,17,31));
-
         MobileAds.initialize(this, status -> {});
         loadInterstitial();
 
@@ -65,7 +65,7 @@ public class MainActivity extends Activity {
         s.setUseWideViewPort(true); s.setCacheMode(WebSettings.LOAD_DEFAULT);
         s.setBuiltInZoomControls(false); s.setDisplayZoomControls(false);
         s.setMediaPlaybackRequiresUserGesture(true);
-        s.setUserAgentString(s.getUserAgentString()+" VERIONNEWS-Android/1.4");
+        s.setUserAgentString(s.getUserAgentString()+" VERIONNEWS-Android/1.4.1-TEST");
 
         webView.setWebChromeClient(new android.webkit.WebChromeClient(){
             @Override public void onProgressChanged(WebView view,int p){ progress.setProgress(p); progress.setVisibility(p>=100?View.GONE:View.VISIBLE); }
