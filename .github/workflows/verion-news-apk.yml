@@ -6,6 +6,11 @@ on:
     paths:
       - 'verion-news-android/**'
       - '.github/workflows/verion-news-apk.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'verion-news-android/**'
+      - '.github/workflows/verion-news-apk.yml'
   workflow_dispatch:
 
 jobs:
