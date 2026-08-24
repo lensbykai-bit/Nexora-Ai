@@ -1,25 +1,18 @@
-name: Build Nexora Dub.Ai APK
+name: Build SkyTap APK
 
 on:
   workflow_dispatch:
-  push:
-    branches: ["main"]
-    paths:
-      - "lib/**"
-      - "pubspec.yaml"
-      - ".github/workflows/build-apk.yml"
   pull_request:
     branches: ["main"]
     paths:
-      - "lib/**"
-      - "pubspec.yaml"
+      - "skytap_project.zip.b64"
       - ".github/workflows/build-apk.yml"
 
 permissions:
   contents: read
 
 jobs:
-  build-android:
+  build-skytap:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -33,71 +26,43 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      - name: Set up Gradle 8.9
+        uses: gradle/actions/setup-gradle@v4
         with:
-          channel: stable
-          cache: true
+          gradle-version: "8.9"
 
-      - name: Create clean Android shell
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK 35
         shell: bash
         run: |
-          set -euo pipefail
-          flutter create \
-            --platforms=android \
-            --android-language kotlin \
-            --org com.nexora \
-            --project-name nexora_dub_ai \
-            .ci_flutter_app
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
-          rm -rf .ci_flutter_app/lib .ci_flutter_app/test
-          cp -R lib .ci_flutter_app/lib
-          cp pubspec.yaml .ci_flutter_app/pubspec.yaml
+      - name: Decode SkyTap project
+        shell: bash
+        run: |
+          base64 -d skytap_project.zip.b64 > /tmp/skytap.zip
+          rm -rf /tmp/skytap
+          mkdir -p /tmp/skytap
+          unzip -q /tmp/skytap.zip -d /tmp/skytap
 
-          if [ -f .ci_flutter_app/android/app/build.gradle.kts ]; then
-            sed -i 's/com\.nexora\.nexora_dub_ai/com.nexora.dubai/g' \
-              .ci_flutter_app/android/app/build.gradle.kts
-          elif [ -f .ci_flutter_app/android/app/build.gradle ]; then
-            sed -i 's/com\.nexora\.nexora_dub_ai/com.nexora.dubai/g' \
-              .ci_flutter_app/android/app/build.gradle
-          else
-            echo "Android app Gradle file was not generated." >&2
-            exit 1
-          fi
-
-          manifest=.ci_flutter_app/android/app/src/main/AndroidManifest.xml
-          sed -i 's/android:label="nexora_dub_ai"/android:label="Nexora Dub.Ai"/' "$manifest"
-
-          old=.ci_flutter_app/android/app/src/main/kotlin/com/nexora/nexora_dub_ai/MainActivity.kt
-          new=.ci_flutter_app/android/app/src/main/kotlin/com/nexora/dubai/MainActivity.kt
-          mkdir -p "$(dirname "$new")"
-          sed 's/package com.nexora.nexora_dub_ai/package com.nexora.dubai/' "$old" > "$new"
-          rm -rf .ci_flutter_app/android/app/src/main/kotlin/com/nexora/nexora_dub_ai
-
-      - name: Get packages
-        working-directory: .ci_flutter_app
-        run: flutter pub get
-
-      - name: Analyze source
-        working-directory: .ci_flutter_app
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings
-
-      - name: Build release APK
-        working-directory: .ci_flutter_app
-        run: flutter build apk --release
+      - name: Build debug APK
+        working-directory: /tmp/skytap/SkyTap_Android_Game
+        run: gradle --no-daemon :app:assembleDebug
 
       - name: Prepare APK artifact
         shell: bash
         run: |
           mkdir -p output
-          cp .ci_flutter_app/build/app/outputs/flutter-apk/app-release.apk \
-            output/Nexora-DubAI-v1.0.0.apk
-          sha256sum output/Nexora-DubAI-v1.0.0.apk > output/SHA256.txt
+          cp /tmp/skytap/SkyTap_Android_Game/app/build/outputs/apk/debug/app-debug.apk output/SkyTap-v1.apk
+          sha256sum output/SkyTap-v1.apk > output/SHA256.txt
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Nexora-DubAI-Android
+          name: SkyTap-v1-APK
           path: output/
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 7
