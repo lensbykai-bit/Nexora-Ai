@@ -8,8 +8,8 @@ android {
         applicationId 'com.verion.news'
         minSdk 24
         targetSdk 36
-        versionCode 12
-        versionName '1.6.3'
+        versionCode 13
+        versionName '1.6.4'
     }
 }
 
@@ -20,4 +20,4 @@ dependencies {
     implementation 'com.google.guava:guava:33.4.8-android'
 }
 
-// VERION NEWS v1.6.3: keep NATIONAL label on one line + responsive overflow fixes + notifications + production Ads.
+// VERION NEWS v1.6.4: full-width cleaner mobile layout + responsive fixes + notifications + production Ads.
