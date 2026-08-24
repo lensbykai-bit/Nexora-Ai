@@ -1,4 +1,4 @@
-name: Build SkyTap APK
+name: Build SkyTap v2 APK
 
 on:
   workflow_dispatch:
@@ -6,6 +6,7 @@ on:
     branches: ["main"]
     paths:
       - "skytap_project.zip.b64"
+      - "skytap_v2_GameView.java"
       - ".github/workflows/build-apk.yml"
 
 permissions:
@@ -40,13 +41,18 @@ jobs:
           yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Decode SkyTap project
+      - name: Decode base SkyTap project
         shell: bash
         run: |
           base64 -d skytap_project.zip.b64 > /tmp/skytap.zip
           rm -rf /tmp/skytap
           mkdir -p /tmp/skytap
           unzip -q /tmp/skytap.zip -d /tmp/skytap
+
+      - name: Apply SkyTap v2 UI
+        shell: bash
+        run: |
+          cp skytap_v2_GameView.java /tmp/skytap/SkyTap_Android_Game/app/src/main/java/com/skytap/game/GameView.java
 
       - name: Build debug APK
         working-directory: /tmp/skytap/SkyTap_Android_Game
@@ -56,13 +62,13 @@ jobs:
         shell: bash
         run: |
           mkdir -p output
-          cp /tmp/skytap/SkyTap_Android_Game/app/build/outputs/apk/debug/app-debug.apk output/SkyTap-v1.apk
-          sha256sum output/SkyTap-v1.apk > output/SHA256.txt
+          cp /tmp/skytap/SkyTap_Android_Game/app/build/outputs/apk/debug/app-debug.apk output/SkyTap-v2.apk
+          sha256sum output/SkyTap-v2.apk > output/SHA256.txt
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: SkyTap-v1-APK
+          name: SkyTap-v2-APK
           path: output/
           if-no-files-found: error
           retention-days: 7
