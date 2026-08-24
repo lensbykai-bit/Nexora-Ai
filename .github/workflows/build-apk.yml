@@ -6,6 +6,7 @@ on:
     branches: ["main"]
     paths:
       - "human5d_project.zip.b64"
+      - "human5d_GameView.java"
       - ".github/workflows/build-apk.yml"
 
 permissions:
@@ -47,7 +48,8 @@ jobs:
           rm -rf /tmp/human5d
           mkdir -p /tmp/human5d
           unzip -o /tmp/human5d.zip -d /tmp/human5d || true
-          test -f /tmp/human5d/SkyTap_Human5D_Game/app/src/main/java/com/skytap/game/GameView.java
+          test -d /tmp/human5d/SkyTap_Human5D_Game
+          cp human5d_GameView.java /tmp/human5d/SkyTap_Human5D_Game/app/src/main/java/com/skytap/game/GameView.java
 
       - name: Build debug APK
         working-directory: /tmp/human5d/SkyTap_Human5D_Game
