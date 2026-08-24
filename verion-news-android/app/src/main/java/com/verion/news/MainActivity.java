@@ -73,6 +73,8 @@ public class MainActivity extends Activity {
         webView = new WebView(this);
         webView.setHorizontalScrollBarEnabled(false);
         webView.setVerticalScrollBarEnabled(false);
+        webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
+
         progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
         progress.setMax(100);
         progress.setProgressTintList(android.content.res.ColorStateList.valueOf(Color.rgb(227,34,46)));
@@ -112,7 +114,7 @@ public class MainActivity extends Activity {
         s.setDisplayZoomControls(false);
         s.setSupportZoom(false);
         s.setMediaPlaybackRequiresUserGesture(true);
-        s.setUserAgentString(s.getUserAgentString() + " VERIONNEWS-Android/1.6.1");
+        s.setUserAgentString(s.getUserAgentString() + " VERIONNEWS-Android/1.6.2");
 
         webView.setWebChromeClient(new android.webkit.WebChromeClient() {
             @Override public void onProgressChanged(WebView view, int p) {
@@ -120,6 +122,7 @@ public class MainActivity extends Activity {
                 progress.setVisibility(p >= 100 ? View.GONE : View.VISIBLE);
             }
         });
+
         webView.setWebViewClient(new WebViewClient() {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri u = request.getUrl();
@@ -142,6 +145,12 @@ public class MainActivity extends Activity {
                 try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (Exception ignored) {}
                 return true;
             }
+
+            @Override public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                lockPageToPhoneWidth(view);
+            }
+
             @Override public void onReceivedError(WebView view, int code, String desc, String failingUrl) {
                 Toast.makeText(MainActivity.this, "Connection error. Please check your internet.", Toast.LENGTH_SHORT).show();
             }
@@ -153,6 +162,20 @@ public class MainActivity extends Activity {
         } else {
             webView.restoreState(state);
         }
+    }
+
+    private void lockPageToPhoneWidth(WebView view) {
+        String js = "(function(){" +
+                "var m=document.querySelector('meta[name=viewport]');" +
+                "if(!m){m=document.createElement('meta');m.name='viewport';document.head.appendChild(m);}" +
+                "m.setAttribute('content','width=device-width, initial-scale=1.0, maximum-scale=1.0');" +
+                "var id='verion-mobile-width-fix';var old=document.getElementById(id);if(old)old.remove();" +
+                "var st=document.createElement('style');st.id=id;" +
+                "st.textContent='html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important;margin-left:0!important;margin-right:0!important;}*{box-sizing:border-box!important;}body>*{max-width:100vw!important;}img,video,iframe,canvas,svg,table{max-width:100%!important;}';" +
+                "document.head.appendChild(st);" +
+                "document.documentElement.scrollLeft=0;document.body.scrollLeft=0;" +
+                "})();";
+        view.evaluateJavascript(js, null);
     }
 
     private void requestNotificationPermissionIfNeeded() {
@@ -187,7 +210,6 @@ public class MainActivity extends Activity {
                 top = Math.max(0, windowInsets.getSystemWindowInsetTop());
                 bottom = Math.max(0, windowInsets.getSystemWindowInsetBottom());
             }
-            // Keep content full-width on all phones; only reserve vertical system-bar space.
             v.setPadding(0, top, 0, bottom);
             return windowInsets;
         });
