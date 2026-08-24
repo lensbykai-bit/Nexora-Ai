@@ -5,6 +5,7 @@ on:
     branches: ["main"]
     paths:
       - "skytap_project.zip.b64"
+      - "skytap_build_trigger.txt"
       - ".github/workflows/skytap-pr-build-temp.yml"
 
 permissions:
