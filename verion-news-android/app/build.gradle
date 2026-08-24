@@ -8,8 +8,8 @@ android {
         applicationId 'com.verion.news'
         minSdk 24
         targetSdk 36
-        versionCode 14
-        versionName '1.6.5'
+        versionCode 15
+        versionName '1.6.6'
     }
 }
 
@@ -20,4 +20,4 @@ dependencies {
     implementation 'com.google.guava:guava:33.4.8-android'
 }
 
-// VERION NEWS v1.6.5: visible floating back button + full-width mobile layout + notifications + production Ads.
+// VERION NEWS v1.6.6: compact back button placed below Breaking News + full-width layout + notifications + production Ads.
