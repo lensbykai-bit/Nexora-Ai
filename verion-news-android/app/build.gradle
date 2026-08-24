@@ -8,13 +8,14 @@ android {
         applicationId 'com.verion.news'
         minSdk 24
         targetSdk 36
-        versionCode 8
-        versionName '1.5.0'
+        versionCode 9
+        versionName '1.6.0'
     }
 }
 
 dependencies {
     implementation 'com.google.android.gms:play-services-ads:24.5.0'
+    implementation 'androidx.work:work-runtime:2.10.1'
 }
 
-// VERION NEWS v1.5: production AdMob + responsive safe-area + adaptive banner.
+// VERION NEWS v1.6: production Ads + responsive UI + automatic Blogger news notifications.
