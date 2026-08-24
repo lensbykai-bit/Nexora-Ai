@@ -48,7 +48,6 @@ public class MainActivity extends Activity {
     private static final String HOME = "https://verionnewss.blogspot.com/";
     private static final int NOTIFICATION_PERMISSION_REQUEST = 1401;
 
-    // VERION NEWS production AdMob units.
     private static final String BANNER_ID = "ca-app-pub-4901980834448866/6731694725";
     private static final String INTERSTITIAL_ID = "ca-app-pub-4901980834448866/3267976911";
 
@@ -72,6 +71,8 @@ public class MainActivity extends Activity {
         FrameLayout webContainer = new FrameLayout(this);
         webContainer.setBackgroundColor(Color.WHITE);
         webView = new WebView(this);
+        webView.setHorizontalScrollBarEnabled(false);
+        webView.setVerticalScrollBarEnabled(false);
         progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
         progress.setMax(100);
         progress.setProgressTintList(android.content.res.ColorStateList.valueOf(Color.rgb(227,34,46)));
@@ -94,7 +95,7 @@ public class MainActivity extends Activity {
 
         bannerHost.post(() -> {
             float density = getResources().getDisplayMetrics().density;
-            int widthPx = bannerHost.getWidth() - bannerHost.getPaddingLeft() - bannerHost.getPaddingRight();
+            int widthPx = bannerHost.getWidth();
             if (widthPx <= 0) widthPx = getResources().getDisplayMetrics().widthPixels;
             int adWidthDp = Math.max(320, (int) (widthPx / density));
             banner.setAdSize(AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidthDp));
@@ -109,8 +110,9 @@ public class MainActivity extends Activity {
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
         s.setBuiltInZoomControls(false);
         s.setDisplayZoomControls(false);
+        s.setSupportZoom(false);
         s.setMediaPlaybackRequiresUserGesture(true);
-        s.setUserAgentString(s.getUserAgentString() + " VERIONNEWS-Android/1.6");
+        s.setUserAgentString(s.getUserAgentString() + " VERIONNEWS-Android/1.6.1");
 
         webView.setWebChromeClient(new android.webkit.WebChromeClient() {
             @Override public void onProgressChanged(WebView view, int p) {
@@ -161,16 +163,9 @@ public class MainActivity extends Activity {
 
     private void scheduleNewsChecks() {
         PeriodicWorkRequest periodic = new PeriodicWorkRequest.Builder(NewsCheckWorker.class, 15, TimeUnit.MINUTES).build();
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-                "verion_news_background_check",
-                ExistingPeriodicWorkPolicy.UPDATE,
-                periodic);
-
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork("verion_news_background_check", ExistingPeriodicWorkPolicy.UPDATE, periodic);
         OneTimeWorkRequest initial = new OneTimeWorkRequest.Builder(NewsCheckWorker.class).build();
-        WorkManager.getInstance(this).enqueueUniqueWork(
-                "verion_news_initial_check",
-                ExistingWorkPolicy.REPLACE,
-                initial);
+        WorkManager.getInstance(this).enqueueUniqueWork("verion_news_initial_check", ExistingWorkPolicy.REPLACE, initial);
     }
 
     @Override protected void onNewIntent(Intent intent) {
@@ -182,17 +177,18 @@ public class MainActivity extends Activity {
 
     private void applySafeAreaInsets(View root) {
         root.setOnApplyWindowInsetsListener((v, windowInsets) -> {
-            int left, top, right, bottom;
+            int top;
+            int bottom;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                Insets bars = windowInsets.getInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
-                left = bars.left; top = bars.top; right = bars.right; bottom = bars.bottom;
+                Insets bars = windowInsets.getInsets(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
+                top = Math.max(0, bars.top);
+                bottom = Math.max(0, bars.bottom);
             } else {
-                left = windowInsets.getSystemWindowInsetLeft();
-                top = windowInsets.getSystemWindowInsetTop();
-                right = windowInsets.getSystemWindowInsetRight();
-                bottom = windowInsets.getSystemWindowInsetBottom();
+                top = Math.max(0, windowInsets.getSystemWindowInsetTop());
+                bottom = Math.max(0, windowInsets.getSystemWindowInsetBottom());
             }
-            v.setPadding(left, top, right, bottom);
+            // Keep content full-width on all phones; only reserve vertical system-bar space.
+            v.setPadding(0, top, 0, bottom);
             return windowInsets;
         });
         root.requestApplyInsets();
