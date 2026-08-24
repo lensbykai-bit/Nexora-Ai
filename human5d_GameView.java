@@ -41,7 +41,6 @@ public class GameView extends View {
 
     @Override protected void onSizeChanged(int width,int height,int oldw,int oldh){
         w=width; h=height; groundY=h*.80f; px=w*.27f; py=groundY;
-        float s = w * .11f;
         pause.set(w*.035f,h*.035f,w*.145f,h*.09f);
         play.set(w*.22f,h*.68f,w*.78f,h*.755f);
         home.set(w*.22f,h*.78f,w*.78f,h*.855f);
@@ -80,7 +79,7 @@ public class GameView extends View {
     }
 
     private void world(Canvas c){
-        p.setShader(new LinearGradient(0,0,0,h,Color.rgb(22,51,83),Color.rgb(72,137,173),Color.rgb(232,181,116),Shader.TileMode.CLAMP));
+        p.setShader(new LinearGradient(0,0,0,h,new int[]{Color.rgb(22,51,83),Color.rgb(72,137,173),Color.rgb(232,181,116)},new float[]{0f,.56f,1f},Shader.TileMode.CLAMP));
         c.drawRect(0,0,w,h,p); p.setShader(null);
         p.setShader(new RadialGradient(w*.76f,h*.18f,w*.34f,Color.argb(190,255,224,153),Color.argb(0,255,224,153),Shader.TileMode.CLAMP));
         c.drawCircle(w*.76f,h*.18f,w*.34f,p); p.setShader(null);
@@ -136,7 +135,7 @@ public class GameView extends View {
         limb(c,-s*.05f,-s*.56f,-s*.14f+phase*s*.18f,s*.01f,s*.15f,Color.rgb(38,48,61));
         limb(c,-s*.12f,-s*1.22f,-s*.38f-phase*s*.12f,-s*.75f,s*.105f,Color.rgb(45,66,84));
         path.reset();path.moveTo(-s*.30f,-s*1.37f);path.lineTo(s*.24f,-s*1.33f);path.lineTo(s*.30f,-s*.60f);path.lineTo(-s*.22f,-s*.58f);path.close();
-        p.setShader(new LinearGradient(-s*.3f,0,s*.3f,0,Color.rgb(29,53,73),Color.rgb(78,112,139),Color.rgb(24,43,60),Shader.TileMode.CLAMP));c.drawPath(path,p);p.setShader(null);
+        p.setShader(new LinearGradient(-s*.3f,0,s*.3f,0,new int[]{Color.rgb(29,53,73),Color.rgb(78,112,139),Color.rgb(24,43,60)},new float[]{0f,.52f,1f},Shader.TileMode.CLAMP));c.drawPath(path,p);p.setShader(null);
         p.setColor(Color.rgb(211,221,220));c.drawRoundRect(new RectF(-s*.05f,-s*1.29f,s*.10f,-s*.73f),s*.035f,s*.035f,p);
         limb(c,s*.10f,-s*.58f,s*.18f-phase*s*.20f,s*.01f,s*.16f,Color.rgb(28,38,49));
         p.setColor(Color.rgb(25,28,32)); c.drawRoundRect(new RectF(-s*.32f+phase*s*.12f,-s*.02f,s*.05f+phase*s*.12f,s*.11f),s*.04f,s*.04f,p); c.drawRoundRect(new RectF(s*.02f-phase*s*.14f,-s*.02f,s*.40f-phase*s*.14f,s*.11f),s*.04f,s*.04f,p);
