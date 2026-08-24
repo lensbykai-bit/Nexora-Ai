@@ -46,7 +46,8 @@ jobs:
           base64 -d human5d_project.zip.b64 > /tmp/human5d.zip
           rm -rf /tmp/human5d
           mkdir -p /tmp/human5d
-          unzip -q /tmp/human5d.zip -d /tmp/human5d
+          unzip -o /tmp/human5d.zip -d /tmp/human5d || true
+          test -f /tmp/human5d/SkyTap_Human5D_Game/app/src/main/java/com/skytap/game/GameView.java
 
       - name: Build debug APK
         working-directory: /tmp/human5d/SkyTap_Human5D_Game
