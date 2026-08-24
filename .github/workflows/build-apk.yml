@@ -49,10 +49,24 @@ jobs:
           mkdir -p /tmp/skytap
           unzip -q /tmp/skytap.zip -d /tmp/skytap
 
-      - name: Apply SkyTap v2 UI
+      - name: Apply and fix SkyTap v2 UI
         shell: bash
         run: |
-          cp skytap_v2_GameView.java /tmp/skytap/SkyTap_Android_Game/app/src/main/java/com/skytap/game/GameView.java
+          target=/tmp/skytap/SkyTap_Android_Game/app/src/main/java/com/skytap/game/GameView.java
+          cp skytap_v2_GameView.java "$target"
+          python3 - "$target" <<'PY'
+          import sys
+          from pathlib import Path
+          f=Path(sys.argv[1])
+          s=f.read_text()
+          s=s.replace(
+            'new LinearGradient(x,y,x+pw,y,Color.rgb(124,230,85),Color.rgb(45,158,56),Color.rgb(111,219,84),Shader.TileMode.CLAMP)',
+            'new LinearGradient(x,y,x+pw,y,new int[]{Color.rgb(124,230,85),Color.rgb(45,158,56),Color.rgb(111,219,84)},null,Shader.TileMode.CLAMP)')
+          s=s.replace(
+            'new LinearGradient(cap.left,0,cap.right,0,Color.rgb(139,237,91),Color.rgb(50,165,57),Color.rgb(126,225,86),Shader.TileMode.CLAMP)',
+            'new LinearGradient(cap.left,0,cap.right,0,new int[]{Color.rgb(139,237,91),Color.rgb(50,165,57),Color.rgb(126,225,86)},null,Shader.TileMode.CLAMP)')
+          f.write_text(s)
+          PY
 
       - name: Build debug APK
         working-directory: /tmp/skytap/SkyTap_Android_Game
