@@ -1,13 +1,14 @@
 package com.verion.news;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,14 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
@@ -29,12 +38,15 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 
+import java.util.concurrent.TimeUnit;
+
 public class MainActivity extends Activity {
     private WebView webView;
     private ProgressBar progress;
     private InterstitialAd interstitialAd;
     private int articleClicks = 0;
     private static final String HOME = "https://verionnewss.blogspot.com/";
+    private static final int NOTIFICATION_PERMISSION_REQUEST = 1401;
 
     // VERION NEWS production AdMob units.
     private static final String BANNER_ID = "ca-app-pub-4901980834448866/6731694725";
@@ -44,6 +56,10 @@ public class MainActivity extends Activity {
         super.onCreate(state);
         getWindow().setStatusBarColor(Color.rgb(7,17,31));
         getWindow().setNavigationBarColor(Color.rgb(7,17,31));
+
+        NewsCheckWorker.createChannel(this);
+        requestNotificationPermissionIfNeeded();
+        scheduleNewsChecks();
 
         MobileAds.initialize(this, status -> {});
         loadInterstitial();
@@ -94,7 +110,7 @@ public class MainActivity extends Activity {
         s.setBuiltInZoomControls(false);
         s.setDisplayZoomControls(false);
         s.setMediaPlaybackRequiresUserGesture(true);
-        s.setUserAgentString(s.getUserAgentString() + " VERIONNEWS-Android/1.5");
+        s.setUserAgentString(s.getUserAgentString() + " VERIONNEWS-Android/1.6");
 
         webView.setWebChromeClient(new android.webkit.WebChromeClient() {
             @Override public void onProgressChanged(WebView view, int p) {
@@ -128,7 +144,40 @@ public class MainActivity extends Activity {
                 Toast.makeText(MainActivity.this, "Connection error. Please check your internet.", Toast.LENGTH_SHORT).show();
             }
         });
-        if (state == null) webView.loadUrl(HOME); else webView.restoreState(state);
+
+        String notificationUrl = getIntent().getStringExtra("article_url");
+        if (state == null) {
+            webView.loadUrl(notificationUrl != null && !notificationUrl.isEmpty() ? notificationUrl : HOME);
+        } else {
+            webView.restoreState(state);
+        }
+    }
+
+    private void requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_PERMISSION_REQUEST);
+        }
+    }
+
+    private void scheduleNewsChecks() {
+        PeriodicWorkRequest periodic = new PeriodicWorkRequest.Builder(NewsCheckWorker.class, 15, TimeUnit.MINUTES).build();
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                "verion_news_background_check",
+                ExistingPeriodicWorkPolicy.UPDATE,
+                periodic);
+
+        OneTimeWorkRequest initial = new OneTimeWorkRequest.Builder(NewsCheckWorker.class).build();
+        WorkManager.getInstance(this).enqueueUniqueWork(
+                "verion_news_initial_check",
+                ExistingWorkPolicy.REPLACE,
+                initial);
+    }
+
+    @Override protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        String url = intent.getStringExtra("article_url");
+        if (webView != null && url != null && !url.isEmpty()) webView.loadUrl(url);
     }
 
     private void applySafeAreaInsets(View root) {
