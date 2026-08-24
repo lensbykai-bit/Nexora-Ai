@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Insets;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,7 +20,6 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
@@ -49,7 +47,6 @@ public class MainActivity extends Activity {
     private int articleClicks = 0;
     private static final String HOME = "https://verionnewss.blogspot.com/";
     private static final int NOTIFICATION_PERMISSION_REQUEST = 1401;
-
     private static final String BANNER_ID = "ca-app-pub-4901980834448866/6731694725";
     private static final String INTERSTITIAL_ID = "ca-app-pub-4901980834448866/3267976911";
 
@@ -57,11 +54,9 @@ public class MainActivity extends Activity {
         super.onCreate(state);
         getWindow().setStatusBarColor(Color.rgb(7,17,31));
         getWindow().setNavigationBarColor(Color.rgb(7,17,31));
-
         NewsCheckWorker.createChannel(this);
         requestNotificationPermissionIfNeeded();
         scheduleNewsChecks();
-
         MobileAds.initialize(this, status -> {});
         loadInterstitial();
 
@@ -76,7 +71,6 @@ public class MainActivity extends Activity {
         webView.setHorizontalScrollBarEnabled(false);
         webView.setVerticalScrollBarEnabled(false);
         webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
-
         progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
         progress.setMax(100);
         progress.setProgressTintList(android.content.res.ColorStateList.valueOf(Color.rgb(227,34,46)));
@@ -84,30 +78,11 @@ public class MainActivity extends Activity {
         FrameLayout.LayoutParams pp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 6);
         pp.gravity = Gravity.TOP;
         webContainer.addView(progress, pp);
-
-        TextView backButton = createBackButton();
-        FrameLayout.LayoutParams backParams = new FrameLayout.LayoutParams(dp(54), dp(54));
-        backParams.gravity = Gravity.START | Gravity.BOTTOM;
-        backParams.setMargins(dp(14), 0, 0, dp(16));
-        webContainer.addView(backButton, backParams);
-
-        backButton.setOnClickListener(v -> {
-            if (webView.canGoBack()) {
-                webView.goBack();
-            } else {
-                String current = webView.getUrl();
-                if (current == null || !current.equals(HOME)) {
-                    webView.loadUrl(HOME);
-                }
-            }
-        });
-
         root.addView(webContainer, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
 
         FrameLayout bannerHost = new FrameLayout(this);
         bannerHost.setBackgroundColor(Color.WHITE);
         root.addView(bannerHost, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-
         AdView banner = new AdView(this);
         banner.setAdUnitId(BANNER_ID);
         FrameLayout.LayoutParams bannerParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -125,163 +100,54 @@ public class MainActivity extends Activity {
         });
 
         WebSettings s = webView.getSettings();
-        s.setJavaScriptEnabled(true);
-        s.setDomStorageEnabled(true);
-        s.setLoadWithOverviewMode(false);
-        s.setUseWideViewPort(false);
-        s.setCacheMode(WebSettings.LOAD_DEFAULT);
-        s.setBuiltInZoomControls(false);
-        s.setDisplayZoomControls(false);
-        s.setSupportZoom(false);
-        s.setMediaPlaybackRequiresUserGesture(true);
-        s.setTextZoom(100);
-        s.setUserAgentString(s.getUserAgentString() + " VERIONNEWS-Android/1.6.5");
+        s.setJavaScriptEnabled(true); s.setDomStorageEnabled(true); s.setLoadWithOverviewMode(false); s.setUseWideViewPort(false);
+        s.setCacheMode(WebSettings.LOAD_DEFAULT); s.setBuiltInZoomControls(false); s.setDisplayZoomControls(false); s.setSupportZoom(false);
+        s.setMediaPlaybackRequiresUserGesture(true); s.setTextZoom(100);
+        s.setUserAgentString(s.getUserAgentString() + " VERIONNEWS-Android/1.6.6");
 
         webView.setWebChromeClient(new android.webkit.WebChromeClient() {
-            @Override public void onProgressChanged(WebView view, int p) {
-                progress.setProgress(p);
-                progress.setVisibility(p >= 100 ? View.GONE : View.VISIBLE);
-            }
+            @Override public void onProgressChanged(WebView view, int p) { progress.setProgress(p); progress.setVisibility(p >= 100 ? View.GONE : View.VISIBLE); }
         });
 
         webView.setWebViewClient(new WebViewClient() {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                Uri u = request.getUrl();
-                String host = u.getHost() == null ? "" : u.getHost();
+                Uri u = request.getUrl(); String host = u.getHost() == null ? "" : u.getHost();
                 if (host.contains("verionnewss.blogspot.com") || host.contains("blogspot.com") || host.contains("blogger.com")) {
                     String path = u.getPath() == null ? "" : u.getPath();
                     if (path.matches(".*/\\d{4}/\\d{2}/.*")) {
                         articleClicks++;
                         if (articleClicks % 3 == 0 && interstitialAd != null) {
-                            String target = u.toString();
-                            interstitialAd.show(MainActivity.this);
-                            interstitialAd = null;
-                            loadInterstitial();
-                            view.loadUrl(target);
-                            return true;
+                            String target = u.toString(); interstitialAd.show(MainActivity.this); interstitialAd = null; loadInterstitial(); view.loadUrl(target); return true;
                         }
                     }
                     return false;
                 }
-                try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (Exception ignored) {}
-                return true;
+                try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (Exception ignored) {} return true;
             }
-
-            @Override public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view, url);
-                applyMobilePageFixes(view);
-            }
-
-            @Override public void onReceivedError(WebView view, int code, String desc, String failingUrl) {
-                Toast.makeText(MainActivity.this, "Connection error. Please check your internet.", Toast.LENGTH_SHORT).show();
-            }
+            @Override public void onPageFinished(WebView view, String url) { super.onPageFinished(view, url); applyMobilePageFixes(view); }
+            @Override public void onReceivedError(WebView view, int code, String desc, String failingUrl) { Toast.makeText(MainActivity.this, "Connection error. Please check your internet.", Toast.LENGTH_SHORT).show(); }
         });
 
         String notificationUrl = getIntent().getStringExtra("article_url");
-        if (state == null) {
-            webView.loadUrl(notificationUrl != null && !notificationUrl.isEmpty() ? notificationUrl : HOME);
-        } else {
-            webView.restoreState(state);
-        }
-    }
-
-    private TextView createBackButton() {
-        TextView button = new TextView(this);
-        button.setText("←");
-        button.setTextColor(Color.WHITE);
-        button.setTextSize(30);
-        button.setGravity(Gravity.CENTER);
-        button.setElevation(dp(8));
-        button.setContentDescription("Back");
-        button.setPadding(0, 0, 0, dp(2));
-
-        GradientDrawable bg = new GradientDrawable();
-        bg.setShape(GradientDrawable.OVAL);
-        bg.setColor(Color.rgb(7,17,31));
-        bg.setStroke(dp(2), Color.rgb(227,34,46));
-        button.setBackground(bg);
-        return button;
-    }
-
-    private int dp(int value) {
-        return Math.round(value * getResources().getDisplayMetrics().density);
+        if (state == null) webView.loadUrl(notificationUrl != null && !notificationUrl.isEmpty() ? notificationUrl : HOME); else webView.restoreState(state);
     }
 
     private void applyMobilePageFixes(WebView view) {
-        String js = "(function(){" +
-                "var m=document.querySelector('meta[name=viewport]');" +
-                "if(!m){m=document.createElement('meta');m.name='viewport';document.head.appendChild(m);}" +
-                "m.setAttribute('content','width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover');" +
-                "var id='verion-mobile-fixes';var old=document.getElementById(id);if(old)old.remove();" +
-                "var st=document.createElement('style');st.id=id;" +
-                "st.textContent='" +
-                "html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important;margin:0!important;padding:0!important;}" +
-                "*{box-sizing:border-box!important;}" +
-                "body>*{max-width:100%!important;}" +
-                ".content-wrapper,.main-wrapper,.main-inner,.content-outer,.content-inner,.post-outer-container,.post-outer,.post,.widget,.section,.centered,.page_body,.main-container,.container,.wrapper{width:100%!important;max-width:100%!important;margin-left:0!important;margin-right:0!important;}" +
-                ".content-inner,.main-inner,.post-outer-container,.post-outer,.post{padding-left:10px!important;padding-right:10px!important;}" +
-                "header,.header,.header-inner,.Header,.navigation,.nav,.tabs-outer,.tabs-inner{max-width:100%!important;}" +
-                "img,video,iframe,canvas,svg,table{max-width:100%!important;height:auto;}" +
-                ".post-body,.post-content,.entry-content{width:100%!important;max-width:100%!important;}" +
-                "[data-verion-nowrap=\"1\"]{white-space:nowrap!important;word-break:normal!important;overflow-wrap:normal!important;hyphens:none!important;min-width:max-content!important;width:auto!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding-left:12px!important;padding-right:12px!important;font-size:clamp(12px,3.4vw,16px)!important;}" +
-                "@media(max-width:600px){.content-inner,.main-inner,.post-outer-container,.post-outer,.post{padding-left:8px!important;padding-right:8px!important;}h1,.post-title,.entry-title{line-height:1.12!important;} }" +
-                "';" +
-                "document.head.appendChild(st);" +
-                "Array.prototype.forEach.call(document.querySelectorAll('a,span,div,button,strong,b'),function(el){" +
-                "var t=(el.textContent||'').replace(/\\s+/g,' ').trim().toUpperCase();" +
-                "if(t==='NATIONAL'){el.setAttribute('data-verion-nowrap','1');}" +
-                "});" +
-                "document.documentElement.scrollLeft=0;document.body.scrollLeft=0;" +
-                "})();";
+        String js = "(function(){"+
+            "var m=document.querySelector('meta[name=viewport]');if(!m){m=document.createElement('meta');m.name='viewport';document.head.appendChild(m);}m.setAttribute('content','width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover');"+
+            "var old=document.getElementById('verion-mobile-fixes');if(old)old.remove();var st=document.createElement('style');st.id='verion-mobile-fixes';st.textContent='html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important;margin:0!important;padding:0!important;}*{box-sizing:border-box!important;}body>*{max-width:100%!important;}.content-wrapper,.main-wrapper,.main-inner,.content-outer,.content-inner,.post-outer-container,.post-outer,.post,.widget,.section,.centered,.page_body,.main-container,.container,.wrapper{width:100%!important;max-width:100%!important;margin-left:0!important;margin-right:0!important;}.content-inner,.main-inner,.post-outer-container,.post-outer,.post{padding-left:10px!important;padding-right:10px!important;}img,video,iframe,canvas,svg,table{max-width:100%!important;height:auto;}[data-verion-nowrap=\\\"1\\\"]{white-space:nowrap!important;word-break:normal!important;overflow-wrap:normal!important;}#verion-app-back{display:inline-flex!important;align-items:center!important;gap:7px!important;background:#07111f!important;color:#fff!important;border:1px solid #e3222e!important;border-radius:8px!important;padding:7px 12px!important;margin:8px 10px 12px!important;font:700 13px Arial,sans-serif!important;line-height:1!important;text-decoration:none!important;box-shadow:0 2px 7px rgba(0,0,0,.15)!important;}';document.head.appendChild(st);"+
+            "Array.prototype.forEach.call(document.querySelectorAll('a,span,div,button,strong,b'),function(el){var t=(el.textContent||'').replace(/\\s+/g,' ').trim().toUpperCase();if(t==='NATIONAL')el.setAttribute('data-verion-nowrap','1');});"+
+            "var oldBtn=document.getElementById('verion-app-back');if(oldBtn)oldBtn.remove();var breaking=null;Array.prototype.some.call(document.querySelectorAll('h1,h2,h3,h4,div,span,strong,b'),function(el){var t=(el.textContent||'').replace(/\\s+/g,' ').trim().toUpperCase();if(t==='BREAKING NEWS'){breaking=el;return true;}return false;});if(breaking){var btn=document.createElement('button');btn.id='verion-app-back';btn.type='button';btn.innerHTML='&#8592;&nbsp; Back';btn.onclick=function(){if(history.length>1){history.back();}else{location.href=\""+HOME+"\";}};var anchor=breaking;while(anchor.parentElement&&anchor.parentElement.children.length===1&&anchor.parentElement!==document.body){anchor=anchor.parentElement;}anchor.insertAdjacentElement('afterend',btn);}"+
+            "document.documentElement.scrollLeft=0;document.body.scrollLeft=0;})();";
         view.evaluateJavascript(js, null);
     }
 
-    private void requestNotificationPermissionIfNeeded() {
-        if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_PERMISSION_REQUEST);
-        }
-    }
-
-    private void scheduleNewsChecks() {
-        PeriodicWorkRequest periodic = new PeriodicWorkRequest.Builder(NewsCheckWorker.class, 15, TimeUnit.MINUTES).build();
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork("verion_news_background_check", ExistingPeriodicWorkPolicy.UPDATE, periodic);
-        OneTimeWorkRequest initial = new OneTimeWorkRequest.Builder(NewsCheckWorker.class).build();
-        WorkManager.getInstance(this).enqueueUniqueWork("verion_news_initial_check", ExistingWorkPolicy.REPLACE, initial);
-    }
-
-    @Override protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        setIntent(intent);
-        String url = intent.getStringExtra("article_url");
-        if (webView != null && url != null && !url.isEmpty()) webView.loadUrl(url);
-    }
-
-    private void applySafeAreaInsets(View root) {
-        root.setOnApplyWindowInsetsListener((v, windowInsets) -> {
-            int top;
-            int bottom;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                Insets bars = windowInsets.getInsets(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
-                top = Math.max(0, bars.top);
-                bottom = Math.max(0, bars.bottom);
-            } else {
-                top = Math.max(0, windowInsets.getSystemWindowInsetTop());
-                bottom = Math.max(0, windowInsets.getSystemWindowInsetBottom());
-            }
-            v.setPadding(0, top, 0, bottom);
-            return windowInsets;
-        });
-        root.requestApplyInsets();
-    }
-
-    private void loadInterstitial() {
-        InterstitialAd.load(this, INTERSTITIAL_ID, new AdRequest.Builder().build(), new InterstitialAdLoadCallback() {
-            @Override public void onAdLoaded(InterstitialAd ad) { interstitialAd = ad; }
-            @Override public void onAdFailedToLoad(LoadAdError error) { interstitialAd = null; }
-        });
-    }
-
-    @Override protected void onResume() { super.onResume(); if (webView != null && webView.getUrl() != null) webView.reload(); }
-    @Override protected void onSaveInstanceState(Bundle out) { webView.saveState(out); super.onSaveInstanceState(out); }
-    @Override public void onBackPressed() { if (webView.canGoBack()) webView.goBack(); else super.onBackPressed(); }
+    private void requestNotificationPermissionIfNeeded() { if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_PERMISSION_REQUEST); }
+    private void scheduleNewsChecks() { PeriodicWorkRequest periodic = new PeriodicWorkRequest.Builder(NewsCheckWorker.class, 15, TimeUnit.MINUTES).build(); WorkManager.getInstance(this).enqueueUniquePeriodicWork("verion_news_background_check", ExistingPeriodicWorkPolicy.UPDATE, periodic); OneTimeWorkRequest initial = new OneTimeWorkRequest.Builder(NewsCheckWorker.class).build(); WorkManager.getInstance(this).enqueueUniqueWork("verion_news_initial_check", ExistingWorkPolicy.REPLACE, initial); }
+    @Override protected void onNewIntent(Intent intent) { super.onNewIntent(intent); setIntent(intent); String url = intent.getStringExtra("article_url"); if (webView != null && url != null && !url.isEmpty()) webView.loadUrl(url); }
+    private void applySafeAreaInsets(View root) { root.setOnApplyWindowInsetsListener((v, windowInsets) -> { int top,bottom; if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) { Insets bars=windowInsets.getInsets(WindowInsets.Type.statusBars()|WindowInsets.Type.navigationBars()); top=Math.max(0,bars.top); bottom=Math.max(0,bars.bottom); } else { top=Math.max(0,windowInsets.getSystemWindowInsetTop()); bottom=Math.max(0,windowInsets.getSystemWindowInsetBottom()); } v.setPadding(0,top,0,bottom); return windowInsets; }); root.requestApplyInsets(); }
+    private void loadInterstitial() { InterstitialAd.load(this, INTERSTITIAL_ID, new AdRequest.Builder().build(), new InterstitialAdLoadCallback(){ @Override public void onAdLoaded(InterstitialAd ad){interstitialAd=ad;} @Override public void onAdFailedToLoad(LoadAdError error){interstitialAd=null;} }); }
+    @Override protected void onResume(){super.onResume();if(webView!=null&&webView.getUrl()!=null)webView.reload();}
+    @Override protected void onSaveInstanceState(Bundle out){webView.saveState(out);super.onSaveInstanceState(out);}
+    @Override public void onBackPressed(){if(webView.canGoBack())webView.goBack();else super.onBackPressed();}
 }
