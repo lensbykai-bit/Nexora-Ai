@@ -107,14 +107,15 @@ public class MainActivity extends Activity {
         WebSettings s = webView.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
-        s.setLoadWithOverviewMode(true);
-        s.setUseWideViewPort(true);
+        s.setLoadWithOverviewMode(false);
+        s.setUseWideViewPort(false);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
         s.setBuiltInZoomControls(false);
         s.setDisplayZoomControls(false);
         s.setSupportZoom(false);
         s.setMediaPlaybackRequiresUserGesture(true);
-        s.setUserAgentString(s.getUserAgentString() + " VERIONNEWS-Android/1.6.3");
+        s.setTextZoom(100);
+        s.setUserAgentString(s.getUserAgentString() + " VERIONNEWS-Android/1.6.4");
 
         webView.setWebChromeClient(new android.webkit.WebChromeClient() {
             @Override public void onProgressChanged(WebView view, int p) {
@@ -168,15 +169,25 @@ public class MainActivity extends Activity {
         String js = "(function(){" +
                 "var m=document.querySelector('meta[name=viewport]');" +
                 "if(!m){m=document.createElement('meta');m.name='viewport';document.head.appendChild(m);}" +
-                "m.setAttribute('content','width=device-width, initial-scale=1.0, maximum-scale=1.0');" +
+                "m.setAttribute('content','width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover');" +
                 "var id='verion-mobile-fixes';var old=document.getElementById(id);if(old)old.remove();" +
                 "var st=document.createElement('style');st.id=id;" +
-                "st.textContent='html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important;margin-left:0!important;margin-right:0!important;}*{box-sizing:border-box!important;}body>*{max-width:100vw!important;}img,video,iframe,canvas,svg,table{max-width:100%!important;}[data-verion-nowrap=\"1\"]{white-space:nowrap!important;word-break:normal!important;overflow-wrap:normal!important;hyphens:none!important;min-width:max-content!important;width:auto!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding-left:14px!important;padding-right:14px!important;font-size:clamp(12px,3.5vw,16px)!important;}';" +
+                "st.textContent='" +
+                "html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important;margin:0!important;padding:0!important;}" +
+                "*{box-sizing:border-box!important;}" +
+                "body>*{max-width:100%!important;}" +
+                ".content-wrapper,.main-wrapper,.main-inner,.content-outer,.content-inner,.post-outer-container,.post-outer,.post,.widget,.section,.centered,.page_body,.main-container,.container,.wrapper{width:100%!important;max-width:100%!important;margin-left:0!important;margin-right:0!important;}" +
+                ".content-inner,.main-inner,.post-outer-container,.post-outer,.post{padding-left:10px!important;padding-right:10px!important;}" +
+                "header,.header,.header-inner,.Header,.navigation,.nav,.tabs-outer,.tabs-inner{max-width:100%!important;}" +
+                "img,video,iframe,canvas,svg,table{max-width:100%!important;height:auto;}" +
+                ".post-body,.post-content,.entry-content{width:100%!important;max-width:100%!important;}" +
+                "[data-verion-nowrap=\"1\"]{white-space:nowrap!important;word-break:normal!important;overflow-wrap:normal!important;hyphens:none!important;min-width:max-content!important;width:auto!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding-left:12px!important;padding-right:12px!important;font-size:clamp(12px,3.4vw,16px)!important;}" +
+                "@media(max-width:600px){.content-inner,.main-inner,.post-outer-container,.post-outer,.post{padding-left:8px!important;padding-right:8px!important;}h1,.post-title,.entry-title{line-height:1.12!important;} }" +
+                "';" +
                 "document.head.appendChild(st);" +
                 "Array.prototype.forEach.call(document.querySelectorAll('a,span,div,button,strong,b'),function(el){" +
                 "var t=(el.textContent||'').replace(/\\s+/g,' ').trim().toUpperCase();" +
-                "if(t==='NATIONAL'){el.setAttribute('data-verion-nowrap','1');" +
-                "var p=el.parentElement;if(p&&p.childElementCount<=3){p.style.whiteSpace='nowrap';p.style.wordBreak='normal';p.style.overflowWrap='normal';}}" +
+                "if(t==='NATIONAL'){el.setAttribute('data-verion-nowrap','1');}" +
                 "});" +
                 "document.documentElement.scrollLeft=0;document.body.scrollLeft=0;" +
                 "})();";
