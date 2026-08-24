@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Insets;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
@@ -82,6 +84,24 @@ public class MainActivity extends Activity {
         FrameLayout.LayoutParams pp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 6);
         pp.gravity = Gravity.TOP;
         webContainer.addView(progress, pp);
+
+        TextView backButton = createBackButton();
+        FrameLayout.LayoutParams backParams = new FrameLayout.LayoutParams(dp(54), dp(54));
+        backParams.gravity = Gravity.START | Gravity.BOTTOM;
+        backParams.setMargins(dp(14), 0, 0, dp(16));
+        webContainer.addView(backButton, backParams);
+
+        backButton.setOnClickListener(v -> {
+            if (webView.canGoBack()) {
+                webView.goBack();
+            } else {
+                String current = webView.getUrl();
+                if (current == null || !current.equals(HOME)) {
+                    webView.loadUrl(HOME);
+                }
+            }
+        });
+
         root.addView(webContainer, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
 
         FrameLayout bannerHost = new FrameLayout(this);
@@ -115,7 +135,7 @@ public class MainActivity extends Activity {
         s.setSupportZoom(false);
         s.setMediaPlaybackRequiresUserGesture(true);
         s.setTextZoom(100);
-        s.setUserAgentString(s.getUserAgentString() + " VERIONNEWS-Android/1.6.4");
+        s.setUserAgentString(s.getUserAgentString() + " VERIONNEWS-Android/1.6.5");
 
         webView.setWebChromeClient(new android.webkit.WebChromeClient() {
             @Override public void onProgressChanged(WebView view, int p) {
@@ -163,6 +183,28 @@ public class MainActivity extends Activity {
         } else {
             webView.restoreState(state);
         }
+    }
+
+    private TextView createBackButton() {
+        TextView button = new TextView(this);
+        button.setText("←");
+        button.setTextColor(Color.WHITE);
+        button.setTextSize(30);
+        button.setGravity(Gravity.CENTER);
+        button.setElevation(dp(8));
+        button.setContentDescription("Back");
+        button.setPadding(0, 0, 0, dp(2));
+
+        GradientDrawable bg = new GradientDrawable();
+        bg.setShape(GradientDrawable.OVAL);
+        bg.setColor(Color.rgb(7,17,31));
+        bg.setStroke(dp(2), Color.rgb(227,34,46));
+        button.setBackground(bg);
+        return button;
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
     private void applyMobilePageFixes(WebView view) {
