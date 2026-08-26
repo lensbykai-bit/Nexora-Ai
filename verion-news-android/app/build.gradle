@@ -1,0 +1,23 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'com.verion.news'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'com.verion.news'
+        minSdk 24
+        targetSdk 36
+        versionCode 17
+        versionName '1.7.0'
+    }
+}
+
+dependencies {
+    implementation 'com.google.android.gms:play-services-ads:24.5.0'
+    implementation 'androidx.work:work-runtime:2.10.1'
+    implementation 'androidx.core:core:1.15.0'
+    implementation 'com.google.guava:guava:33.4.8-android'
+}
+
+// VERION NEWS v1.7.0 Stable: no auto reload on resume, stricter trusted-domain handling, less intrusive interstitial ads, and hardened notification checks.
