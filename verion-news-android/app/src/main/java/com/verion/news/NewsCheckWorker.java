@@ -24,10 +24,12 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 public class NewsCheckWorker extends Worker {
     public static final String CHANNEL_ID = "verion_latest_news";
     private static final String FEED = "https://verionnewss.blogspot.com/feeds/posts/default?alt=json&max-results=1";
+    private static final String HOME = "https://verionnewss.blogspot.com/";
     private static final String PREFS = "verion_news_prefs";
     private static final String LAST_ID = "last_post_id";
 
@@ -39,13 +41,18 @@ public class NewsCheckWorker extends Worker {
     public Result doWork() {
         HttpURLConnection connection = null;
         try {
-            URL url = new URL(FEED);
-            connection = (HttpURLConnection) url.openConnection();
+            connection = (HttpURLConnection) new URL(FEED).openConnection();
             connection.setConnectTimeout(12000);
             connection.setReadTimeout(12000);
-            connection.setRequestProperty("User-Agent", "VERIONNEWS-Android/1.6");
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setRequestProperty("User-Agent", "VERIONNEWS-Android/1.7.0");
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            int responseCode = connection.getResponseCode();
+            if (responseCode < 200 || responseCode >= 300) return Result.retry();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    connection.getInputStream(), StandardCharsets.UTF_8));
             StringBuilder json = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) json.append(line);
@@ -56,19 +63,25 @@ public class NewsCheckWorker extends Worker {
             if (entries == null || entries.length() == 0) return Result.success();
 
             JSONObject post = entries.getJSONObject(0);
-            String id = post.getJSONObject("id").optString("$t", "");
-            String title = post.getJSONObject("title").optString("$t", "New story from VERION NEWS");
+            String id = post.optJSONObject("id") != null
+                    ? post.getJSONObject("id").optString("$t", "") : "";
+            String title = post.optJSONObject("title") != null
+                    ? post.getJSONObject("title").optString("$t", "New story from VERION NEWS")
+                    : "New story from VERION NEWS";
             String link = findAlternateLink(post.optJSONArray("link"));
 
-            SharedPreferences prefs = getApplicationContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+            SharedPreferences prefs = getApplicationContext()
+                    .getSharedPreferences(PREFS, Context.MODE_PRIVATE);
             String previous = prefs.getString(LAST_ID, "");
+
+            if (id.isEmpty()) return Result.success();
 
             if (previous.isEmpty()) {
                 prefs.edit().putString(LAST_ID, id).apply();
                 return Result.success();
             }
 
-            if (!id.isEmpty() && !id.equals(previous)) {
+            if (!id.equals(previous)) {
                 prefs.edit().putString(LAST_ID, id).apply();
                 showNotification(title, link);
             }
@@ -81,15 +94,15 @@ public class NewsCheckWorker extends Worker {
     }
 
     private String findAlternateLink(JSONArray links) {
-        if (links == null) return "https://verionnewss.blogspot.com/";
+        if (links == null) return HOME;
         for (int i = 0; i < links.length(); i++) {
-            JSONObject l = links.optJSONObject(i);
-            if (l != null && "alternate".equals(l.optString("rel"))) {
-                String href = l.optString("href", "");
-                if (!href.isEmpty()) return href;
+            JSONObject item = links.optJSONObject(i);
+            if (item != null && "alternate".equals(item.optString("rel"))) {
+                String href = item.optString("href", "");
+                if (href.startsWith(HOME)) return href;
             }
         }
-        return "https://verionnewss.blogspot.com/";
+        return HOME;
     }
 
     private void showNotification(String title, String url) {
@@ -97,15 +110,19 @@ public class NewsCheckWorker extends Worker {
         createChannel(context);
 
         if (Build.VERSION.SDK_INT >= 33 &&
-                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+                        != PackageManager.PERMISSION_GRANTED) {
             return;
         }
 
         Intent intent = new Intent(context, MainActivity.class);
         intent.putExtra("article_url", url);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
         PendingIntent pendingIntent = PendingIntent.getActivity(
-                context, (int) System.currentTimeMillis(), intent,
+                context,
+                (int) (System.currentTimeMillis() & 0x0fffffff),
+                intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
@@ -114,10 +131,14 @@ public class NewsCheckWorker extends Worker {
                 .setContentText(title)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(title))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_NEWS)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .setAutoCancel(true)
+                .setOnlyAlertOnce(true)
                 .setContentIntent(pendingIntent);
 
-        NotificationManagerCompat.from(context).notify((int) (System.currentTimeMillis() & 0x0fffffff), builder.build());
+        NotificationManagerCompat.from(context).notify(
+                (int) (System.currentTimeMillis() & 0x0fffffff), builder.build());
     }
 
     public static void createChannel(Context context) {
@@ -127,8 +148,9 @@ public class NewsCheckWorker extends Worker {
                     "Latest VERION NEWS",
                     NotificationManager.IMPORTANCE_HIGH);
             channel.setDescription("Notifications when VERION NEWS publishes a new story");
+            channel.enableVibration(true);
             NotificationManager manager = context.getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(channel);
+            if (manager != null) manager.createNotificationChannel(channel);
         }
     }
 }
