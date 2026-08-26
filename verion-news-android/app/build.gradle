@@ -8,8 +8,8 @@ android {
         applicationId 'com.verion.news'
         minSdk 24
         targetSdk 36
-        versionCode 16
-        versionName '1.6.7'
+        versionCode 17
+        versionName '1.7.0'
     }
 }
 
@@ -20,4 +20,4 @@ dependencies {
     implementation 'com.google.guava:guava:33.4.8-android'
 }
 
-// VERION NEWS v1.6.7: remove custom Back button; keep full-width layout, notifications and production Ads.
+// VERION NEWS v1.7.0 Stable: no auto reload on resume, stricter trusted-domain handling, less intrusive interstitial ads, and hardened notification checks.
