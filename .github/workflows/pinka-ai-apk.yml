@@ -1,0 +1,56 @@
+name: Build PINKA Ai APK
+
+on:
+  push:
+    branches:
+      - pinka-ai-apk-build
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pinka_ai_app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Create Android project files
+        run: flutter create . --platforms=android --org ai.pinka --project-name pinka_ai
+
+      - name: Generate PINKA Ai logo
+        run: |
+          python3 -m pip install --quiet pillow
+          python3 tool/generate_logo.py
+
+      - name: Install packages
+        run: flutter pub get
+
+      - name: Generate launcher icons
+        run: dart run flutter_launcher_icons
+
+      - name: Set app label and Android compatibility
+        run: |
+          sed -i 's/android:label="pinka_ai"/android:label="PINKA Ai"/' android/app/src/main/AndroidManifest.xml || true
+
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - name: Verify APK exists
+        run: |
+          test -f build/app/outputs/flutter-apk/app-release.apk
+          ls -lh build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: PINKA-Ai-Pink5D-APK
+          path: pinka_ai_app/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
